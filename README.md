@@ -22,7 +22,7 @@ Then create a new virutal environment ([see the documentation for what is going 
 
 activate the environment
 
-   source .venv/bin/activate
+    source .venv/bin/activate
 
 Then, *only for the first time*, install the needed packages (after doing ```souruce .venv/bin/activate```):
 
@@ -34,15 +34,15 @@ Now you can run the commands below. To leave the virtual enviroment, use
 
 which will give you back the ordinary shell.
 
-In general, to use ```virutalenv``` from a new terminal window once you have the ````.venv``` setup, you do
+In general, to use ```virutalenv``` from a new terminal window once you have the ```.venv``` setup, you do
 
-   cd <path to ismo_airfoil>
-   source .venv/bin/activate
-   # Now you are in the virtual environemnt (promp should have a (.venv) in it)
-   cd airfoil_chain
-   bash run_in_bash.sh
-   # do some more
-   deactivate
+    cd <path to ismo_airfoil>
+    source .venv/bin/activate
+    # Now you are in the virtual environemnt (promp should have a (.venv) in it)
+    cd airfoil_chain
+    bash run_in_bash.sh
+    # do some more
+    deactivate
    
 
 
