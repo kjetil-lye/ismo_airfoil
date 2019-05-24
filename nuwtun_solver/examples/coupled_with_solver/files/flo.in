@@ -1,0 +1,36 @@
+'RESTART OUT'   1
+     'rae.rst1'
+'PLOT3D'  0
+     'FORMATTED'
+     'rae'
+'MACH'       0.729e0
+'ALPHA'      2.31
+'KAPPA'      0.3333333333E0
+'LIMIT'      3
+'MULTIGRID LEVELS' 2
+'MESH SEQUENCE'    2
+     250
+     250
+'NITS'       1000
+'CFL'        10.0
+'ITUPDT'     5
+'TWOD'       1
+'GRID'       1
+          'grid.unf'
+'BLOCK'      1
+     'DIMENSIONS'       1
+           243      43       2
+     'FLUX'    1
+          'ROE'        1
+     'BC'         6
+          'BC'      19   1   1      225   1   2   'TANGENCY'
+          'BC'       1  43   1      243  43   2   'FARFIELD'
+          'BC'       1   1   1        1  43   2   'FARFIELD'
+          'BC'     243   1   1      243  43   2   'FARFIELD'
+          'BC'       1   1   1      243  43   1   'EXTRAPOLATE'
+          'BC'       1   1   2      243  43   2   'EXTRAPOLATE'
+'END BLOCK'    1
+'CUT'   1.
+     'ONE'     1     1   1   1       19   1   2 
+     'ONE'     1   243   1   1      225   1   2       1  2  3
+'END'       0

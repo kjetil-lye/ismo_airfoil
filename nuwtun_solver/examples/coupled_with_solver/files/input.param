@@ -1,0 +1,12 @@
+# INPUT FILE FOR PYTHON WRAPPER
+# WARNING!! DO NOT USE TABS 
+
+# Basic paths/parameters
+solver_input_file = flo.in
+
+# Flags for main operations
+mesh_pert         = yes
+find_area         = yes
+initiate_solver   = yes
+extract_data      = yes
+
