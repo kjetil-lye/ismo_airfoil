@@ -4,8 +4,10 @@ import sys
 
 
 class SeveralVariablesCommands(ismo.submit.defaults.Commands):
-    def __init__(self, **kwargs):
+    def __init__(self, number_of_processes=1, **kwargs):
         super().__init__(**kwargs)
+
+        self.number_of_processes=1
 
         self.preproccsed_filename_base = self.prefix + 'preprocessed_values_{}.txt'
         self.simulated_output_filename_base = self.prefix + 'simulation_output_{}.txt'
@@ -23,13 +25,13 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
         submitter(preprocess, wait_time_in_hours=24)
 
         # Evolve
-        evolve = ismo.submit.Command([self.python_command, 'simulate_airfoil.py'])
+        evolve = ismo.submit.Command(['mpirun', '-np', str(self.number_of_processes), self.python_command, 'simulate_airfoil.py'])
         simulated_output_filename = self.simulated_output_filename_base.format(iteration_number)
         evolve = evolve.with_long_arguments(input_parameters_file=output_preprocess,
                                             output_values_file=simulated_output_filename,
                                             iteration_number=iteration_number,
                                             starting_sample=self.number_of_samples_generated)
-        submitter(evolve, wait_time_in_hours=24)
+        submitter(evolve, wait_time_in_hours=24, number_of_processes=1)
 
         # Postprocess
         postprocess = ismo.submit.Command([self.python_command, 'postprocess.py'])
@@ -44,6 +46,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""
 Submits all the jobs for the sine experiments
         """)
+
+    parser.add_argument('--number_of_processes', type=int, default=1,
+                        help='Number of processes to use (for MPI, only applies to simulation step)')
 
     parser.add_argument('--number_of_samples_per_iteration', type=int, nargs='+',
                         help='Number of samples per iteration')
@@ -62,6 +67,7 @@ Submits all the jobs for the sine experiments
     submitter = ismo.submit.create_submitter(args.submitter, args.chain_name, dry_run=args.dry_run)
 
     commands = SeveralVariablesCommands(dimension=20,
+                                        number_of_processes=1,
                                         number_of_output_values=3,
                                         training_parameter_config_file='training_parameters.json',
                                         optimize_target_file='objective.py',
