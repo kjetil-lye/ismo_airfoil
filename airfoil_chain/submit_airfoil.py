@@ -7,7 +7,8 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
     def __init__(self, number_of_processes=1, **kwargs):
         super().__init__(**kwargs)
 
-        self.number_of_processes=1
+
+        self.number_of_processes=number_of_processes
 
         self.preproccsed_filename_base = self.prefix + 'preprocessed_values_{}.txt'
         self.simulated_output_filename_base = self.prefix + 'simulation_output_{}.txt'
@@ -25,7 +26,8 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
         submitter(preprocess, wait_time_in_hours=24)
 
         # Evolve
-        evolve = ismo.submit.Command(['mpirun', '-np', str(self.number_of_processes), self.python_command, 'simulate_airfoil.py'])
+
+        evolve = ismo.submit.Command(['mpirun', '-np', str(self.number_of_processes[iteration_number]), self.python_command, 'simulate_airfoil.py'])
         simulated_output_filename = self.simulated_output_filename_base.format(iteration_number)
         evolve = evolve.with_long_arguments(input_parameters_file=output_preprocess,
                                             output_values_file=simulated_output_filename,
@@ -47,7 +49,7 @@ if __name__ == '__main__':
 Submits all the jobs for the sine experiments
         """)
 
-    parser.add_argument('--number_of_processes', type=int, default=1,
+    parser.add_argument('--number_of_processes', type=int, default=[1], nargs='+',
                         help='Number of processes to use (for MPI, only applies to simulation step)')
 
     parser.add_argument('--number_of_samples_per_iteration', type=int, nargs='+',
@@ -66,8 +68,19 @@ Submits all the jobs for the sine experiments
 
     submitter = ismo.submit.create_submitter(args.submitter, args.chain_name, dry_run=args.dry_run)
 
+    number_of_processes = args.number_of_processes
+
+
+
+    if len(number_of_processes) != 1 and len(number_of_processes) != len(args.number_of_samples_per_iteration):
+        raise Exception(f"number_of_processes should either be a single number, or the same number as the number of iterations\n" +\
+                        f"got {number_of_processes}, while number_of_samples_per_iteration was {args.number_of_samples_per_iteration}")
+
+    elif len(number_of_processes) == 1:
+        number_of_processes = [number_of_processes[0] for k in args.number_of_samples_per_iteration]
+
     commands = SeveralVariablesCommands(dimension=20,
-                                        number_of_processes=1,
+                                        number_of_processes=number_of_processes,
                                         number_of_output_values=3,
                                         training_parameter_config_file='training_parameters.json',
                                         optimize_target_file='objective.py',
