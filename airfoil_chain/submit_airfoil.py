@@ -7,6 +7,8 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
     def __init__(self, number_of_processes=1, **kwargs):
         super().__init__(**kwargs)
 
+        self.current_sample_number = 0
+
 
         self.number_of_processes=number_of_processes
 
@@ -32,7 +34,7 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
         evolve = evolve.with_long_arguments(input_parameters_file=output_preprocess,
                                             output_values_file=simulated_output_filename,
                                             iteration_number=iteration_number,
-                                            starting_sample=self.number_of_samples_generated)
+                                            starting_sample=self.current_sample_number)
         submitter(evolve, wait_time_in_hours=24, number_of_processes=1)
 
         # Postprocess
@@ -40,6 +42,7 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
         postprocess = postprocess.with_long_arguments(input_values_file=simulated_output_filename,
                                                       output_values_files=output_value_files)
         submitter(postprocess, wait_time_in_hours=24)
+        self.current_sample_number = self.number_of_samples_generated
 
 
 if __name__ == '__main__':
