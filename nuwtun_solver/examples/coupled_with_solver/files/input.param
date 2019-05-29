@@ -5,6 +5,7 @@
 solver_input_file = flo.in
 
 # Flags for main operations
+verbose           = no
 mesh_pert         = yes
 find_area         = yes
 initiate_solver   = yes

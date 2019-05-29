@@ -47,8 +47,10 @@ def read_parameter(input):
     in_file.close()
     return d
 
-def mesh_pert(d):
-    print ("\n\n    --- READING AND DEFORMING MESH\n\n")
+def mesh_pert(d, v):
+
+    if(v):
+        print ("\n\n    --- READING AND DEFORMING MESH\n\n")
     # Check if necessary input files are available
     assert(os.path.exists('grid.0'))
     assert(os.path.exists('shape.in'))
@@ -58,8 +60,10 @@ def mesh_pert(d):
     #subprocess.run("deform")
     os.system(comline)
 
-def find_area(d):
-    print ("    --- FINDING AREA ENCLOSED BY AIRFOIL\n")
+def find_area(d, v):
+
+    if(v):
+        print ("    --- FINDING AREA ENCLOSED BY AIRFOIL\n")
     # Check if necessary input files are available
     assert(os.path.exists('grid.unf'))
     assert(os.path.exists('shape.in'))
@@ -69,8 +73,10 @@ def find_area(d):
     os.system(comline)
     #subprocess.run("area")
 
-def init_solver(d):
-    print ("    --- STARTING SOLVER\n")
+def init_solver(d,v):
+
+    if (v):
+        print ("    --- STARTING SOLVER\n")
     pname = rs(d['solver_input_file'])
     # Check if necessary input files are available
     assert(os.path.exists('grid.unf'))
@@ -79,8 +85,10 @@ def init_solver(d):
     comline = "nuwtun_flo < "+pname+" > output_solver.out"
     os.system(comline)
 
-def extract_data(d):
-    print ("    --- EXTRACTING DATA\n\n")
+def extract_data(d, v):
+
+    if(v):
+        print ("    --- EXTRACTING DATA\n\n")
 
     # Check if necessary input files are available
     if(os.path.exists('fort.19')):   # File is absent id simulation failed
@@ -107,16 +115,24 @@ def extract_data(d):
 script, input = argv
 param_map = read_parameter(input)
 
-print ("    ---------------------------------------------------------------------------\n")
-print ("    INITIATING REQUESTED TASKS: \n")
+if(rs(param_map['verbose']) == 'yes'):
+    verbose = True
+else:
+    verbose = False
+
+if(verbose):
+    print ("    ---------------------------------------------------------------------------\n")
+    print ("    INITIATING REQUESTED TASKS: \n")
 
 # execution of main operations
 if rs(param_map['mesh_pert']) == 'yes':
-    mesh_pert(param_map)
+    mesh_pert(param_map, verbose)
 if rs(param_map['find_area']) == 'yes':
-    find_area(param_map)
+    find_area(param_map, verbose)
 if rs(param_map['initiate_solver']) == 'yes':
-    init_solver(param_map)
+    init_solver(param_map, verbose)
 if rs(param_map['extract_data']) == 'yes':
-    extract_data(param_map)
-print ("    ---------------------------------------------------------------------------\n")
+    extract_data(param_map, verbose)
+
+if(verbose):
+    print ("    ---------------------------------------------------------------------------\n")

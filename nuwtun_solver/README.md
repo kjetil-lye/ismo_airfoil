@@ -5,7 +5,7 @@ The code for the solver is taken from [here](https://bitbucket.org/cpraveen/nuwt
 
 Add the following lines to your `.bashrc` file
 
-	export NUWTUN_HOME=$WORK/GIT_reps/nuwtun
+	export NUWTUN_HOME=<path-to-nuwtun-directory>
 	PATH=$PATH:$NUWTUN_HOME/src-flo
 	PATH=$PATH:$NUWTUN_HOME/src-grd
 	PATH=$PATH:$NUWTUN_HOME/src-utl
@@ -27,9 +27,9 @@ To compile the code and create the various executables, run the following comman
 	# evaluate airfoil area
 	make deform area
 
+## Running the code coupled with the optimizer
 
-The main example folder where the samples are save is 
+The script `optimizer_interface.py` in the directory `airfoil_chain` acts as an interface to setup the various samples and run the solver for a set of input parameters. The folder where the samples are save is 
 
 	nuwtun_solver/examples/coupled_with_solver
 
-which needs to be added to the python path.
