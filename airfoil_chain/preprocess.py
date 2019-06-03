@@ -13,6 +13,10 @@ Takes the parameter input file and adds the sample number
     parser.add_argument('--output_parameters_file', type=str, required=True,
                         help='Output filename for the parameters (will be written by np.savetxt)')
 
+    parser.add_argument('--sample_start', type=int, required=True,
+                        help='Starting number for the sample')
+
+
     args = parser.parse_args()
 
     parameters = np.loadtxt(args.input_parameters_file)
@@ -21,6 +25,6 @@ Takes the parameter input file and adds the sample number
 
     for n in range(parameters.shape[0]):
         parameters_new[n, 1:] = parameters[n, :]
-        parameters_new[n, 0] = n
+        parameters_new[n, 0] = n + args.sample_start
 
     np.savetxt(args.output_parameters_file, parameters_new)

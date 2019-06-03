@@ -24,7 +24,8 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
         preprocess = ismo.submit.Command([self.python_command, 'preprocess.py'])
         output_preprocess = self.preproccsed_filename_base.format(iteration_number)
         preprocess = preprocess.with_long_arguments(input_parameters_file=input_parameters_file,
-                                                    output_parameters_file=output_preprocess)
+                                                    output_parameters_file=output_preprocess,
+                                                    sample_start=self.current_sample_number)
         submitter(preprocess, wait_time_in_hours=24)
 
         # Evolve
