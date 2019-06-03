@@ -36,7 +36,7 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
                                             output_values_file=simulated_output_filename,
                                             iteration_number=iteration_number,
                                             starting_sample=self.current_sample_number)
-        submitter(evolve, wait_time_in_hours=24, number_of_processes=1)
+        submitter(evolve, wait_time_in_hours=24, number_of_processes=self.number_of_processes[iteration_number])
 
         # Postprocess
         postprocess = ismo.submit.Command([self.python_command, 'postprocess.py'])
