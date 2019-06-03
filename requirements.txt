@@ -14,6 +14,7 @@ Markdown==3.1.1
 matplotlib==3.1.0
 matplotlib2tikz==0.7.4
 mock==3.0.5
+mpi4py==3.0.1
 numpy==1.16.3
 Pillow==6.0.0
 protobuf==3.7.1
