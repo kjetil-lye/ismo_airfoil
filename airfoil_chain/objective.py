@@ -1,6 +1,4 @@
 import numpy as np
-import gradients
-import machine_learning
 class Objective(object):
     def __init__(self, C_D_ref = 0.011562, C_L_ref = 0.87633, A_ref=0.077862,
                  penalization_lift=1e4, penalization_area=1e3):
