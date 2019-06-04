@@ -75,11 +75,11 @@ dgesl.o: dgesl.f
 
 deform: $(ODEF)
 	@echo "Building   deform"
-	@$(FC) $(LDFLAGS) -o deform $(ODEF) $(LIBPATH) -lblas
+	@$(FC) $(LDFLAGS) -o deform $(ODEF) $(LIBPATH) -lopenblas
 
 deform_adj: $(OADJ)
 	@echo "Building   deform_adj"
-	@$(FC) $(LDFLAGS) -o deform_adj $(OADJ) $(LIBPATH) -lblas
+	@$(FC) $(LDFLAGS) -o deform_adj $(OADJ) $(LIBPATH) -lopenblas
 
 volume: volume.o
 	@echo "Building   volume"
