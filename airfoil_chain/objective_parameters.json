@@ -1,7 +1,0 @@
-{
-    "C_D_ref" : 0.011562,
-    "C_L_ref" : 0.87633,
-    "A_ref"   : 0.077862,
-    "penalization_lift"  : 1e4,
-    "penalization_area" : 0.0
-}
