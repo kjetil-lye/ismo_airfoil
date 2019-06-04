@@ -90,7 +90,8 @@ Submits all the jobs for the sine experiments
                                         optimize_target_file='objective.py',
                                         optimize_target_class='Objective',
                                         python_command=sys.executable,
-                                        objective_parameter_file='penalties.json'
+                                        objective_parameter_file='penalties.json',
+                                        optimization_parameter_file='objective_parameters.json'
                                         )
 
     chain = ismo.submit.Chain(args.number_of_samples_per_iteration, submitter,

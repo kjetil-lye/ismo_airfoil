@@ -1,14 +1,23 @@
 import numpy as np
-
-
+import gradients
+import machine_learning
 class Objective(object):
-    def __init__(self, sin_penalty=10, cos_penalty=10, tan_penalty=10):
-        self.sin_penalty = sin_penalty
-        self.cos_penalty = cos_penalty
-        self.tan_penalty = tan_penalty
+    def __init__(self, C_D_ref = 0.011562, C_L_ref = 0.87633, A_ref=0.077862,
+                 penalization_lift=1e4, penalization_area=1e3):
 
-    def __call__(self, x):
-        return self.sin_penalty * x[0] ** 2 + self.cos_penalty * x[1] + self.tan_penalty * x[2]
+        self.C_D_ref = C_D_ref
+        self.C_L_ref = C_L_ref
+        self.A_ref = A_ref
+        self.penalization_lift = penalization_lift
+        self.penalization_area = penalization_area
 
-    def grad(self, x):
-        return np.array([2 * x[0], 1, 1])
+    def __call__(self, C_D, C_L, A):
+        return C_D/self.C_D_ref + \
+            self.penalization_lift * np.maximum(0, 0.999 - C_L/self.C_L_ref) + \
+            self.penalization_area * np.maximum(0, self.A_ref-A)
+
+    def grad(self, C_D, C_L, A):
+        return np.array([1.0/self.C_D_ref,
+                         (0.999 - C_L/self.C_L_ref > 0) * self.penalization_lift * max(0, 0.999 - C_L/self.C_L_ref),
+                         (self.A_ref-A > 0) * self.penalization_area * max(0, self.A_ref-A)])
+
