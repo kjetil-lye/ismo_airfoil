@@ -43,6 +43,8 @@ class ChangeFolder:
 def get_configuration_name(basename, rerun, iteration_sizes):
     return f'{basename}_rerun_{rerun}_iterations_{"_".join(map(str, iteration_sizes))}'
 
+
+
 def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name):
     folder_name = get_configuration_name(basename, rerun, iteration_sizes)
     os.mkdir(folder_name)
@@ -64,7 +66,9 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                                   '--submitter',
                                   submitter_name,
                                   '--starting_sample',
-                                  str(starting_sample)
+                                  str(starting_sample),
+                                  '--chain_name',
+                                  folder_name
                                   ]
 
                 if dry_run:
@@ -78,7 +82,7 @@ Runs the ensemble for M different runs (to get some statistics)./
 
 """)
 
-    parser.add_argument('--number_of_reruns', type=int, default=50,
+    parser.add_argument('--number_of_reruns', type=int, default=10,
                         help='Total number of reruns to get the ensemble')
 
 
