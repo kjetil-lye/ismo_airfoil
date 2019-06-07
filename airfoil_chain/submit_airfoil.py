@@ -68,6 +68,9 @@ Submits all the jobs for the sine experiments
     parser.add_argument('--dry_run', action='store_true',
                         help="Don't actually run the command, only print the commands that are to be executed")
 
+    parser.add_argument('--starting_sample', type=int, default=0,
+                        help='The sample to start from')
+
     args = parser.parse_args()
 
     submitter = ismo.submit.create_submitter(args.submitter, args.chain_name, dry_run=args.dry_run)
@@ -84,6 +87,7 @@ Submits all the jobs for the sine experiments
         number_of_processes = [number_of_processes[0] for k in args.number_of_samples_per_iteration]
 
     commands = SeveralVariablesCommands(dimension=20,
+                                        starting_sample=args.starting_sample,
                                         number_of_processes=number_of_processes,
                                         number_of_output_values=3,
                                         training_parameter_config_file='training_parameters.json',
