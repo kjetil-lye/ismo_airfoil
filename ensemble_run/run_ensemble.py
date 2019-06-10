@@ -4,6 +4,20 @@ import git
 import copy
 import sys
 import subprocess
+import glob
+
+def all_successfully_completed():
+    lsf_files = glob.glob('lsf.o*')
+
+    for lsf_filename in lsf_files:
+        with open(lsf_filename) as f:
+            content = f.read()
+
+
+            if 'Successfully completed' not in content:
+                return False
+
+    return True
 
 class PathForNuwtun:
     """
@@ -45,12 +59,15 @@ def get_configuration_name(basename, rerun, iteration_sizes):
 
 
 
-def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name):
+def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name, only_missing):
     folder_name = get_configuration_name(basename, rerun, iteration_sizes)
-    os.mkdir(folder_name)
+    if not only_missing:
+        os.mkdir(folder_name)
     with ChangeFolder(folder_name):
-        shutil.copytree(os.path.join(repository_path, 'nuwtun_solver'), 'nuwtun_solver')
-        shutil.copytree(os.path.join(repository_path, 'airfoil_chain'), 'airfoil_chain')
+        if not only_missing:
+            shutil.copytree(os.path.join(repository_path, 'nuwtun_solver'), 'nuwtun_solver')
+            shutil.copytree(os.path.join(repository_path, 'airfoil_chain'), 'airfoil_chain')
+
 
 
         with PathForNuwtun():
@@ -73,7 +90,14 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
 
                 if dry_run:
                     command_to_run.append('--dry_run')
-                subprocess.run(command_to_run, check=True)
+
+                if only_missing:
+                    should_run = all_successfully_completed()
+                else:
+                    should_run = True
+
+                if should_run:
+                    subprocess.run(command_to_run, check=True)
 
 if __name__ == '__main__':
     import argparse
@@ -110,6 +134,9 @@ Runs the ensemble for M different runs (to get some statistics)./
     parser.add_argument('--submitter', type=str, default='lsf',
                         help='Name of submitter to use, can be lsf or bash')
 
+    parser.add_argument('--only_missing', action='store_true',
+                        help='Only run missing configurations')
+
     args = parser.parse_args()
 
 
@@ -126,7 +153,8 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   iteration_sizes=iteration_sizes,
                                   repository_path=args.repository_path,
                                   dry_run=args.dry_run,
-                                  submitter_name=args.submitter)
+                                  submitter_name=args.submitter,
+                                  only_missing=args.only_missing)
 
 
 
