@@ -59,19 +59,19 @@ def get_configuration_name(basename, iteration_sizes):
 
 
 
-def run_configuration(*, basename, reruns, number_of_processes, iteration_sizes, repository_path, dry_run, submitter_name, only_missing):
+def run_configuration(*, basename, reruns, number_of_processes, iteration_sizes, repository_path, dry_run, only_missing):
     folder_name = get_configuration_name(basename, iteration_sizes)
     if not only_missing:
         os.mkdir(folder_name)
     with ChangeFolder(folder_name):
         if not only_missing:
             shutil.copytree(os.path.join(repository_path, 'nuwtun_solver'), 'nuwtun_solver')
-            shutil.copytree(os.path.join(repository_path, 'airfoil_chain'), 'airfoil_chain')
+            shutil.copytree(os.path.join(repository_path, 'airfoil_integrated'), 'airfoil_integrated')
 
 
 
         with PathForNuwtun():
-            with ChangeFolder('airfoil_chain'):
+            with ChangeFolder('airfoil_integrated'):
                 iteration_sizes_as_str = [str(x) for x in iteration_sizes]
                 command_to_submit_list = [sys.executable,
                                           'run_airfoil.py',
@@ -91,6 +91,8 @@ def run_configuration(*, basename, reruns, number_of_processes, iteration_sizes,
                 command_to_submit = " ".join(command_to_submit_list)
                 command_to_run = [
                     "bsub",
+                    "-W",
+                    "120:00",
                     "-n",
                     str(number_of_processes),
                     command_to_submit
@@ -151,7 +153,7 @@ Runs the ensemble for M different runs (to get some statistics)./
             batch_size = iteration_sizes[-1]
             number_of_processes = min(args.max_processes, batch_size)
             run_configuration(basename=args.basename,
-                              reruns=number_of_reruns,
+                              reruns=args.number_of_reruns,
                               iteration_sizes=iteration_sizes,
                               repository_path=args.repository_path,
                               dry_run=args.dry_run,
