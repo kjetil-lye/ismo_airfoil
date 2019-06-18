@@ -1,0 +1,12 @@
+{
+    "optimizer" : "Adam",
+    "loss" : "mean_squared_error",
+    "l2_regularization" : 7.81249980263965e-07,
+    "network_topology" : [20, 20, 20, 20, 20, 20, 20, 1],
+    "activation" : "relu",
+    "epochs" : 500000,
+    "should_use_early_stopping" : true,
+    "learning_rate" : 0.001,
+    "early_stopping_patience" : 50,
+    "retrainings" : 5
+}
