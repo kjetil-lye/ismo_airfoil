@@ -59,7 +59,14 @@ def get_configuration_name(basename, iteration_sizes):
 
 
 
-def run_configuration(*, basename, reruns, number_of_processes, iteration_sizes, repository_path, dry_run, only_missing):
+def run_configuration(*, basename,
+                      reruns, 
+                      number_of_processes,
+                      iteration_sizes, 
+                      repository_path, 
+                      dry_run,
+                      only_missing,
+                      memory):
     folder_name = get_configuration_name(basename, iteration_sizes)
     if not only_missing:
         os.mkdir(folder_name)
@@ -91,6 +98,8 @@ def run_configuration(*, basename, reruns, number_of_processes, iteration_sizes,
                 command_to_submit = " ".join(command_to_submit_list)
                 command_to_run = [
                     "bsub",
+                     '-R',
+                     f'rusage[mem={memory}]',
                     "-W",
                     "120:00",
                     "-n",
@@ -140,6 +149,12 @@ Runs the ensemble for M different runs (to get some statistics)./
 
     parser.add_argument('--only_missing', action='store_true',
                         help='Only run missing configurations')
+    
+    
+    parser.add_argument('--memory', type=int, default=8000,
+                        help="Memory per process (in MB)")
+    
+    
 
     args = parser.parse_args()
 
