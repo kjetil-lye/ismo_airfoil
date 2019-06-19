@@ -173,7 +173,8 @@ Runs the ensemble for M different runs (to get some statistics)./
                               repository_path=args.repository_path,
                               dry_run=args.dry_run,
                               number_of_processes=number_of_processes,
-                              only_missing=args.only_missing)
+                              only_missing=args.only_missing,
+                              memory=args.memory)
 
 
 
