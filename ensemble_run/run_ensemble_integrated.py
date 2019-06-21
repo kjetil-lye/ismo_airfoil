@@ -5,6 +5,8 @@ import copy
 import sys
 import subprocess
 import glob
+import ismo.submit
+import multiprocessing
 
 def all_successfully_completed():
     lsf_files = glob.glob('lsf.o*')
@@ -66,7 +68,8 @@ def run_configuration(*, basename,
                       repository_path, 
                       dry_run,
                       only_missing,
-                      memory):
+                      memory,
+                      submitter):
     folder_name = get_configuration_name(basename, iteration_sizes)
     if not only_missing:
         os.mkdir(folder_name)
@@ -95,22 +98,13 @@ def run_configuration(*, basename,
                     should_run = all_successfully_completed()
                 else:
                     should_run = True
-                command_to_submit = " ".join(command_to_submit_list)
-                command_to_run = [
-                    "bsub",
-                     '-R',
-                     f'rusage[mem={memory}]',
-                    "-W",
-                    "120:00",
-                    "-n",
-                    str(number_of_processes),
-                    command_to_submit
-                    ]
 
-                if dry_run:
-                    command_to_run = ['echo', *command_to_run]
-                if should_run:
-                    subprocess.run(command_to_run, check=True)
+                command = ismo.submit.Command(command_to_submit_list)
+
+                submitter(command,
+                          number_of_processes=number_of_processes,
+                          wait_time_in_hours=120,
+                          memory_limit_in_mb=memory)
 
 if __name__ == '__main__':
     import argparse
@@ -132,7 +126,7 @@ Runs the ensemble for M different runs (to get some statistics)./
     parser.add_argument('--starting_sizes', type=int, nargs='+', default=[16, 32, 64],
                         help='Starting sizes to use')
 
-    parser.add_argument('--max_processes', type=int, default=16,
+    parser.add_argument('--max_processes', type=int, default=multiprocessing.cpu_count(),
                         help='Maximum number of processes')
 
     parser.add_argument('--batch_size_factors', type=float, nargs='+', default=[0.5, 1],
@@ -153,11 +147,12 @@ Runs the ensemble for M different runs (to get some statistics)./
     
     parser.add_argument('--memory', type=int, default=8000,
                         help="Memory per process (in MB)")
-    
-    
+
+    parser.add_argument('--submitter', type=str, default='bash',
+                        help="Submitter (either bash or lsf)")
 
     args = parser.parse_args()
-
+    submitter = ismo.submit.create_submitter(args.submitter, None, dry_run=args.dry_run)
 
     for starting_size in args.starting_sizes:
         for batch_size_factor in args.batch_size_factors:
@@ -174,7 +169,8 @@ Runs the ensemble for M different runs (to get some statistics)./
                               dry_run=args.dry_run,
                               number_of_processes=number_of_processes,
                               only_missing=args.only_missing,
-                              memory=args.memory)
+                              memory=args.memory,
+                              submitter=submitter)
 
 
 
