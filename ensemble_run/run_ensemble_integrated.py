@@ -69,7 +69,8 @@ def run_configuration(*, basename,
                       dry_run,
                       only_missing,
                       memory,
-                      submitter):
+                      submitter,
+                      generator):
     folder_name = get_configuration_name(basename, iteration_sizes)
     if not only_missing:
         os.mkdir(folder_name)
@@ -90,7 +91,9 @@ def run_configuration(*, basename,
                                           '--number_of_processes',
                                           str(number_of_processes),
                                           '--retries',
-                                          str(reruns)
+                                          str(reruns),
+                                          '--generator',
+                                          generator
                                   ]
 
 
@@ -151,6 +154,10 @@ Runs the ensemble for M different runs (to get some statistics)./
     parser.add_argument('--submitter', type=str, default='bash',
                         help="Submitter (either bash or lsf)")
 
+    parser.add_argument('--generator', type=str, default='monte-carlo',
+                        help="Generator to use (either 'monte-carlo' or 'sobol')")
+
+
     args = parser.parse_args()
     submitter = ismo.submit.create_submitter(args.submitter, None, dry_run=args.dry_run)
 
@@ -170,7 +177,8 @@ Runs the ensemble for M different runs (to get some statistics)./
                               number_of_processes=number_of_processes,
                               only_missing=args.only_missing,
                               memory=args.memory,
-                              submitter=submitter)
+                              submitter=submitter,
+                              generator=args.generator)
 
 
 
