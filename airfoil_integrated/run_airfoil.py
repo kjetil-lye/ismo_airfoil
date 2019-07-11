@@ -11,6 +11,22 @@ import plot_info
 from simulate_airfoil import simulate_airfoil
 from objective import Objective
 
+class LossWriter:
+    def __init__(self, basename):
+        self.basename = basename
+        self.iteration = 0
+
+    def __call__(self, loss):
+        np.save(f'{self.basename}_iteration_{self.iteration}.npy', loss.history['loss'])
+        f = plt.figure(self.iteration)
+
+        plt.semilogy(loss.history['loss'])
+        plt.xlabel('Epoch')
+        plt.ylabel("Loss")
+        f.savefig(f'{self.basename}_iteration_{self.iteration}.png')
+        plt.close(f)
+        self.iteration += 1
+
 class SimulatorRunner:
     def __init__(self, number_of_processes, starting_sample):
         self.number_of_processes = number_of_processes
@@ -76,8 +92,11 @@ Runs the airfoil experiment
 
         optimizer = ismo.optimizers.create_optimizer(args.optimizer)
 
-        trainer = ismo.train.MultiVariateTrainer(
-            [ismo.train.create_trainer_from_simple_file(args.simple_configuration_file) for _ in range(number_of_variables)])
+        trainers = [ismo.train.create_trainer_from_simple_file(args.simple_configuration_file) for _ in range(number_of_variables)]
+
+        for var_index, trainer in enumerate(trainers):
+            trainer.add_loss_history_writer(LossWriter(f'{prefix}loss_var_{var_index}_try_{try_number}'))
+        trainer = ismo.train.MultiVariateTrainer(trainers)
 
         starting_sample = try_number*sum(args.number_of_samples_per_iteration)
         parameters, values = ismo.iterative_surrogate_model_optimization(
@@ -113,9 +132,13 @@ Runs the airfoil experiment
                 generator = ismo.samples.create_sample_generator(args.generator)
         
                 optimizer = ismo.optimizers.create_optimizer(args.optimizer)
-        
-                trainer = ismo.train.MultiVariateTrainer(
-                    [ismo.train.create_trainer_from_simple_file(args.simple_configuration_file) for _ in range(number_of_variables)])
+
+                trainers = [ismo.train.create_trainer_from_simple_file(args.simple_configuration_file) for _ in
+                            range(number_of_variables)]
+
+                for var_index, trainer in enumerate(trainers):
+                    trainer.add_loss_history_writer(LossWriter(f'{prefix}loss_competitor_var_{var_index}_iteration_{iteration_number}_try_{try_number}'))
+                trainer = ismo.train.MultiVariateTrainer(trainers)
 
                 starting_sample = try_number*(number_of_samples_post+number_of_samples)
                 parameters, values = ismo.iterative_surrogate_model_optimization(
