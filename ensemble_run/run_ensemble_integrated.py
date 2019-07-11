@@ -93,7 +93,9 @@ def run_configuration(*, basename,
                                           '--retries',
                                           str(reruns),
                                           '--generator',
-                                          generator
+                                          generator,
+                                          '--with_competitor',
+                                          '--save_result'
                                   ]
 
 

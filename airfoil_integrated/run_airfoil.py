@@ -146,7 +146,7 @@ Runs the airfoil experiment
                     sample_generator=generator,
                     trainer=trainer,
                     optimizer=optimizer,
-                    simulator=SimulatorRunner(args.number_of_procsses, starting_sample),
+                    simulator=SimulatorRunner(args.number_of_processes, starting_sample),
                     objective_function=objective,
                     dimension=dimension,
                     starting_sample=starting_sample
