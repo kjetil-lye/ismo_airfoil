@@ -174,7 +174,7 @@ Runs the airfoil experiment
                 competitor_min_values['objective'][try_number, iteration_number] = objective_values[arg_min]
 
                 for n, name in enumerate(['lift', 'drag', 'area']):
-                    competitor_min_values[name].append(values[arg_min, n])
+                    competitor_min_values[name][try_number, iteration_number] = values[arg_min, n]
     
                 if args.save_result:
                     np.savetxt(f'{prefix}competitor_parameters_{try_number}_it_{iteration_number}_samples_{samples_as_str}.txt', parameters)
