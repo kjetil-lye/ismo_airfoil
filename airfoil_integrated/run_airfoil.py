@@ -115,7 +115,7 @@ Runs the airfoil experiment
             starting_sample=starting_sample
         )
         values = np.array(values)
-        objective_values = [objective(values[i,0], values[i,1], values[i, 2]) for i in range(values.shape[0])]
+        objective_values = [objective(values[i,:]) for i in range(values.shape[0])]
 
 
         per_iteration = collections.defaultdict(list)
@@ -167,7 +167,7 @@ Runs the airfoil experiment
                     starting_sample=starting_sample
                 )
                 values=np.array(values)
-                objective_values = [objective(values[i, 0], values[i, 1], values[i, 2]) for i in range(values.shape[0])]
+                objective_values = [objective(values[i, :]) for i in range(values.shape[0])]
 
                 arg_min = np.argmin(objective_values)
 
