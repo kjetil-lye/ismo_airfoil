@@ -15,6 +15,7 @@ from simulate_airfoil import simulate_airfoil
 from objective import Objective
 import matplotlib
 matplotlib.use('Agg')
+import collections
 class LossWriter:
     def __init__(self, basename):
         self.basename = basename
@@ -87,7 +88,7 @@ Runs the airfoil experiment
     prefix = args.prefix
 
 
-    all_values_min = []
+    all_values_min = collections.defaultdict(list)
 
     samples_as_str = "_".join(map(str, args.number_of_samples_per_iteration))
     for try_number in range(args.retries):
@@ -113,20 +114,30 @@ Runs the airfoil experiment
             dimension=dimension,
             starting_sample=starting_sample
         )
+        values = np.array(values)
+        objective_values = [objective(values[i,0], values[i,1], values[i, 2]) for i in range(values.shape[0])]
 
-        per_iteration = []
+
+        per_iteration = collections.defaultdict(list)
+
         total_number_of_samples = 0
         for number_of_samples in args.number_of_samples_per_iteration:
             total_number_of_samples += number_of_samples
-            per_iteration.append(np.min(values[:total_number_of_samples]))
-        all_values_min.append(per_iteration)
+            arg_min = np.argmin(objective_values[:total_number_of_samples])
+            for n, name in enumerate(['lift', 'drag', 'area']):
+                per_iteration[name].append(values[arg_min,n])
+            per_iteration['objective'].append(objective_values[arg_min])
+
+        for func_name, func_values in per_iteration.items():
+            all_values_min[func_name].append(per_iteration)
 
         if args.save_result:
             np.savetxt(f'{prefix}parameters_{try_number}_samples_{samples_as_str}.txt', parameters)
             np.savetxt(f'{prefix}values_{try_number}_samples_{samples_as_str}.txt', values)
+            np.savetxt(f'{prefix}objective_values_{try_number}_samples_{samples_as_str}.txt', objective_values)
 
     if args.with_competitor:
-        competitor_min_values = np.zeros((args.retries, len(args.number_of_samples_per_iteration)-1))
+        competitor_min_values = collections.defaultdict(lambda: np.zeros((args.retries, len(args.number_of_samples_per_iteration)-1)))
         for try_number in range(args.retries):
             
             print(f"try_number (competitor): {try_number}")
@@ -155,27 +166,38 @@ Runs the airfoil experiment
                     dimension=dimension,
                     starting_sample=starting_sample
                 )
-        
-                competitor_min_values[try_number, iteration_number] = np.min(values)
+                values=np.array(values)
+                objective_values = [objective(values[i, 0], values[i, 1], values[i, 2]) for i in range(values.shape[0])]
+
+                arg_min = np.argmin(objective_values)
+
+                competitor_min_values['objective'][try_number, iteration_number] = objective_values[arg_min]
+
+                for n, name in enumerate(['lift', 'drag', 'area']):
+                    competitor_min_values[name].append(values[arg_min, n])
     
                 if args.save_result:
                     np.savetxt(f'{prefix}competitor_parameters_{try_number}_it_{iteration_number}_samples_{samples_as_str}.txt', parameters)
                     np.savetxt(f'{prefix}competitor_values_{try_number}_it_{iteration_number}_samples_{samples_as_str}.txt', values)
+                    np.savetxt(f'{prefix}competitor_objective_values_{try_number}_it_{iteration_number}_samples_{samples_as_str}.txt',
+                        objective_values)
     
             
         
     print("Done!")
     iterations = np.arange(0, len(args.number_of_samples_per_iteration))
-    plt.errorbar(iterations, np.mean(all_values_min,0), 
-                 yerr=np.std(all_values_min,0), fmt='o',
-                 label='ISMO')
+    for name, values in all_values_min.items():
+        plt.errorbar(iterations, np.mean(values,0),
+                     yerr=np.std(values,0), fmt='o',
+                     label='ISMO')
     
-    if args.with_competitor:
-        plt.errorbar(iterations[:-1], np.mean(competitor_min_values,0), 
-                 yerr=np.std(competitor_min_values,0), fmt='*',
+        if args.with_competitor:
+            plt.errorbar(iterations[:-1], np.mean(competitor_min_values[name],0),
+                 yerr=np.std(competitor_min_values[name],0), fmt='*',
                  label='DNN+Opt')
-    plt.legend()
-    plt.xlabel('Iteration')
-    plt.ylabel('Min value')
+        plt.legend()
+        plt.xlabel('Iteration')
+        plt.ylabel('Min value')
+        plt.title(name)
     
-    plot_info.savePlot(f'{prefix}optimized_value_{samples_as_str}')
+        plot_info.savePlot(f'{prefix}optimized_value_{name}_{samples_as_str}')
