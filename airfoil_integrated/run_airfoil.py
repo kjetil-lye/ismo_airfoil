@@ -17,8 +17,8 @@ from objective import Objective
 import matplotlib
 matplotlib.use('Agg')
 import collections
-
-
+from keras import backend as K
+import tensorflow
 class SimulatorRunner:
     def __init__(self, number_of_processes, starting_sample):
         self.number_of_processes = number_of_processes
@@ -73,6 +73,14 @@ Runs the airfoil experiment
     number_of_variables = 3 # lift drag area
     args = parser.parse_args()
     prefix = args.prefix
+
+    #####################
+    
+    session_conf = tensorflow.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+    sess = tensorflow.Session(graph=tensorflow.get_default_graph(), config=session_conf)
+    K.set_session(sess)
+    #####################
+
 
     ismo.convergence.convergence_study(
         generator_name = args.generator,
