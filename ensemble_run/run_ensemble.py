@@ -59,7 +59,7 @@ def get_configuration_name(basename, rerun, iteration_sizes):
 
 
 
-def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name, only_missing):
+def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name, only_missing, container, container_type):
     folder_name = get_configuration_name(basename, rerun, iteration_sizes)
     if not only_missing:
         os.mkdir(folder_name)
@@ -87,6 +87,11 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                                   '--chain_name',
                                   folder_name
                                   ]
+
+                if container is not None:
+                    command_to_run.extend(['--container', container])
+                if container_type is not None:
+                    command_to_run.extend(['--container_type', container_type])
 
                 if dry_run:
                     command_to_run.append('--dry_run')
@@ -119,7 +124,7 @@ Runs the ensemble for M different runs (to get some statistics)./
     parser.add_argument('--starting_sizes', type=int, nargs='+', default=[16, 32, 64],
                         help='Starting sizes to use')
 
-    parser.add_argument('--batch_size_factors', type=float, nargs='+', default=[0.5, 1],
+    parser.add_argument('--batch_size_factors', type=float, nargs='+', default=[0.25, 0.5, 1],
                         help='Batch sizes to use as a ratio of starting_size')
 
 
@@ -136,6 +141,14 @@ Runs the ensemble for M different runs (to get some statistics)./
 
     parser.add_argument('--only_missing', action='store_true',
                         help='Only run missing configurations')
+
+
+    parser.add_argument('--container_type', type=str, default=None,
+                        help="Container type (none, docker, singularity)")
+
+    parser.add_argument('--container', type=str, default='docker://kjetilly/machine_learning_base:0.1.2',
+                        help='Container name')
+
 
     args = parser.parse_args()
 
@@ -154,7 +167,9 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   repository_path=args.repository_path,
                                   dry_run=args.dry_run,
                                   submitter_name=args.submitter,
-                                  only_missing=args.only_missing)
+                                  only_missing=args.only_missing,
+                                  container_type=args.container_type,
+                                  container=args.container)
 
 
 

@@ -71,9 +71,18 @@ Submits all the jobs for the sine experiments
     parser.add_argument('--starting_sample', type=int, default=0,
                         help='The sample to start from')
 
+
+    parser.add_argument('--container_type', type=str, default=None,
+                        help="Container type (none, docker, singularity)")
+
+    parser.add_argument('--container', type=str, default='docker://kjetilly/machine_learning_base:0.1.2',
+                        help='Container name')
+
     args = parser.parse_args()
 
-    submitter = ismo.submit.create_submitter(args.submitter, args.chain_name, dry_run=args.dry_run)
+    submitter = ismo.submit.create_submitter(args.submitter, args.chain_name, dry_run=args.dry_run,
+                            container_type=args.container_type,
+                            container=args.container)
 
     number_of_processes = args.number_of_processes
 
@@ -93,7 +102,7 @@ Submits all the jobs for the sine experiments
                                         training_parameter_config_file='training_parameters.json',
                                         optimize_target_file='objective.py',
                                         optimize_target_class='Objective',
-                                        python_command=sys.executable,
+                                        python_command='python',
                                         objective_parameter_file='penalties.json'
                                         )
 
