@@ -1,10 +1,6 @@
-with open("hei.txt", 'w') as f:
-    f.write("alla\n")
-    f.flush()
 import numpy as np
 
 if __name__ == '__main__':
-    print("Hei")
     import argparse
     from mpi4py import MPI
     import optimizer_interface as opi
@@ -38,15 +34,5 @@ Runs some complicated function on the input parameters
 
     values = opi.run_simulator(starting_sample_id, parameters, path_to_main_dir)
 
-    # if(rank == 0):
-    #     print(values)
-
-    # values = np.zeros((parameters.shape[0], 4))
-    #
-    # for k in range(parameters.shape[0]):
-    #     values[k,0] = k
-    #     values[k,1] = np.sin(parameters[k,2]+parameters[k,0])
-    #     values[k,2] = np.cos(parameters[k, 19] + parameters[k, 5])
-    #     values[k,3] = np.tan(parameters[k, 4] + parameters[k, 8])
     if(rank == 0):
         np.savetxt(args.output_values_file, values)
