@@ -1,6 +1,10 @@
+with open("hei.txt", 'w') as f:
+    f.write("alla\n")
+    f.flush()
 import numpy as np
 
 if __name__ == '__main__':
+    print("Hei")
     import argparse
     from mpi4py import MPI
     import optimizer_interface as opi

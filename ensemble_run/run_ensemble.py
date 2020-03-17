@@ -5,6 +5,7 @@ import copy
 import sys
 import subprocess
 import glob
+import json
 
 def all_successfully_completed():
     lsf_files = glob.glob('lsf.o*')
@@ -54,13 +55,17 @@ class ChangeFolder:
         os.chdir(self.old_folder)
 
 
-def get_configuration_name(basename, rerun, iteration_sizes):
-    return f'{basename}_rerun_{rerun}_iterations_{"_".join(map(str, iteration_sizes))}'
+def get_configuration_name(basename, rerun, starting_size, batch_size_factor):
+    return f'{basename}_rerun_{rerun}_iterations_{starting_size}_{batch_size_factor}'
 
 
 
-def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name, only_missing, container, container_type):
-    folder_name = get_configuration_name(basename, rerun, iteration_sizes)
+def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name, only_missing, container, container_type,
+                      sample_generator):
+    starting_size = iteration_sizes[0]
+    batch_size_factor = iteration_sizes[0]/iteration_sizes[1]
+
+    folder_name = get_configuration_name(basename, rerun, starting_size, batch_size_factor)
     if not only_missing:
         os.mkdir(folder_name)
     with ChangeFolder(folder_name):
@@ -85,7 +90,9 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                                   '--starting_sample',
                                   str(starting_sample),
                                   '--chain_name',
-                                  folder_name
+                                  folder_name,
+                                  '--generator',
+                                  sample_generator
                                   ]
 
                 if container is not None:
@@ -103,6 +110,17 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
 
                 if should_run:
                     subprocess.run(command_to_run, check=True)
+                    
+def get_competitor_basename(args.basename):
+    return f'{args.basename}_competitor'
+
+def get_iteration_sizes(starting_size, batch_size_factor, compute_budget):
+    iteration_sizes = [starting_size]
+
+    while sum(iteration_sizes) < compute_budget:
+        iteration_sizes.append(int(batch_size_factor * starting_size))
+
+    return iteration_sizes
 
 if __name__ == '__main__':
     import argparse
@@ -149,16 +167,26 @@ Runs the ensemble for M different runs (to get some statistics)./
     parser.add_argument('--container', type=str, default='docker://kjetilly/machine_learning_base:0.1.2',
                         help='Container name')
 
+    parser.add_argument('--generator', type=str, default="monte-carlo",
+                        help="Generator to use (either 'monte-carlo' or 'sobol'")
+
 
     args = parser.parse_args()
 
 
+    # Save configuration for easy read afterwards
+    with open("ensemble_setup.json", 'w') as f:
+        json.dump(vars(args), f, indent=4)
+
+    
+    # This will be to store the competitors afterwards
+    all_sample_sizes = []
+    
+    # Loop through configurations
     for starting_size in args.starting_sizes:
         for batch_size_factor in args.batch_size_factors:
-            iteration_sizes = [starting_size]
 
-            while sum(iteration_sizes) < args.compute_budget:
-                iteration_sizes.append(int(batch_size_factor*starting_size))
+            iteration_sizes = get_iteration_sizes(starting_size, batch_size_factor, args.compute_budget)
 
             for rerun in range(args.number_of_reruns):
                 run_configuration(basename=args.basename,
@@ -169,7 +197,41 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   submitter_name=args.submitter,
                                   only_missing=args.only_missing,
                                   container_type=args.container_type,
-                                  container=args.container)
+                                  container=args.container,
+                                  sample_generator=args.generator)
+            
+            
+            for iteration_number, iteration_size in enumerate(iteration_sizes):
+                
+                number_of_samples = sum(iteration_sizes[:iteration_number + 1])
+                all_sample_sizes.append(number_of_samples)
+                
+    
+    # Make sure we do not have duplications
+    all_sample_sizes = set(all_sample_sizes)
+    
+    # Run competitors
+    for sample_size in all_sample_sizes:
+        for rerun in range(args.number_of_reruns):
+            run_configuration(basename=get_competitor_basename(args.basename),
+                                  rerun=rerun,
+                                  # First is the number of points we will use to 
+                                  # train, second is the number that will be 
+                                  # evaluated. Our whole budget is sample_size//2,
+                                  # so we evaluate half at the samples for training,
+                                  # and then use the rest to optimize/evaluate the resulting
+                                  # optimized points
+                                  iteration_sizes=[sample_size//2, sample_size//2],
+                                  repository_path=args.repository_path,
+                                  dry_run=args.dry_run,
+                                  submitter_name=args.submitter,
+                                  only_missing=args.only_missing,
+                                  container_type=args.container_type,
+                                  container=args.container,
+                                  sample_generator=args.generator)
+            
+                    
+                
 
 
 

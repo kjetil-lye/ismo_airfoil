@@ -1,49 +1,50 @@
+import ismo
 import ismo.submit
 import ismo.submit.defaults
 import sys
 
 
 class SeveralVariablesCommands(ismo.submit.defaults.Commands):
-    def __init__(self, number_of_processes=1, **kwargs):
-        super().__init__(**kwargs)
+     def __init__(self, number_of_processes=1, **kwargs):
+         super().__init__(**kwargs)
 
-        self.current_sample_number = 0
+         self.current_sample_number = 0
 
 
-        self.number_of_processes=number_of_processes
+         self.number_of_processes=number_of_processes
 
-        self.preproccsed_filename_base = self.prefix + 'preprocessed_values_{}.txt'
-        self.simulated_output_filename_base = self.prefix + 'simulation_output_{}.txt'
+         self.preproccsed_filename_base = self.prefix + 'preprocessed_values_{}.txt'
+         self.simulated_output_filename_base = self.prefix + 'simulation_output_{}.txt'
 
-    def do_evolve(self, submitter,
-                  *,
-                  iteration_number: int,
-                  input_parameters_file: str,
-                  output_value_files: list):
-        # Preprocess
-        preprocess = ismo.submit.Command([self.python_command, 'preprocess.py'])
-        output_preprocess = self.preproccsed_filename_base.format(iteration_number)
-        preprocess = preprocess.with_long_arguments(input_parameters_file=input_parameters_file,
-                                                    output_parameters_file=output_preprocess,
-                                                    sample_start=self.current_sample_number)
-        submitter(preprocess, wait_time_in_hours=24)
+     def do_evolve(self, submitter,
+                   *,
+                   iteration_number: int,
+                   input_parameters_file: str,
+                   output_value_files: list):
+         # Preprocess
+         preprocess = ismo.submit.Command([self.python_command, 'preprocess.py'])
+         output_preprocess = self.preproccsed_filename_base.format(iteration_number)
+         preprocess = preprocess.with_long_arguments(input_parameters_file=input_parameters_file,
+                                                     output_parameters_file=output_preprocess,
+                                                     sample_start=self.current_sample_number)
+         submitter(preprocess, wait_time_in_hours=24)
 
-        # Evolve
+         # Evolve
 
-        evolve = ismo.submit.Command(['mpirun', '-np', str(self.number_of_processes[iteration_number]), self.python_command, 'simulate_airfoil.py'])
-        simulated_output_filename = self.simulated_output_filename_base.format(iteration_number)
-        evolve = evolve.with_long_arguments(input_parameters_file=output_preprocess,
-                                            output_values_file=simulated_output_filename,
-                                            iteration_number=iteration_number,
-                                            starting_sample=self.current_sample_number)
-        submitter(evolve, wait_time_in_hours=24, number_of_processes=self.number_of_processes[iteration_number])
+         evolve = ismo.submit.Command(['mpirun', '-np', str(self.number_of_processes[iteration_number]), self.python_command, 'simulate_airfoil.py'])
+         simulated_output_filename = self.simulated_output_filename_base.format(iteration_number)
+         evolve = evolve.with_long_arguments(input_parameters_file=output_preprocess,
+                                             output_values_file=simulated_output_filename,
+                                             iteration_number=iteration_number,
+                                             starting_sample=self.current_sample_number)
+         submitter(evolve, wait_time_in_hours=24, number_of_processes=self.number_of_processes[iteration_number])
 
-        # Postprocess
-        postprocess = ismo.submit.Command([self.python_command, 'postprocess.py'])
-        postprocess = postprocess.with_long_arguments(input_values_file=simulated_output_filename,
-                                                      output_values_files=output_value_files)
-        submitter(postprocess, wait_time_in_hours=24)
-        self.current_sample_number = self.number_of_samples_generated
+         # Postprocess
+         postprocess = ismo.submit.Command([self.python_command, 'postprocess.py'])
+         postprocess = postprocess.with_long_arguments(input_values_file=simulated_output_filename,
+                                                       output_values_files=output_value_files)
+         submitter(postprocess, wait_time_in_hours=24)
+         self.current_sample_number = self.number_of_samples_generated
 
 
 if __name__ == '__main__':
@@ -61,6 +62,9 @@ Submits all the jobs for the sine experiments
 
     parser.add_argument('--chain_name', type=str, default="several",
                         help="Name of the chain to run")
+
+    parser.add_argument('--generator', type=str, default="monte-carlo",
+                        help="Generator to use (either 'monte-carlo' or 'sobol'")
 
     parser.add_argument('--submitter', type=str, required=True,
                         help='Submitter to be used. Either "bash" (runs without waiting) or "lsf"')
@@ -103,10 +107,12 @@ Submits all the jobs for the sine experiments
                                         optimize_target_file='objective.py',
                                         optimize_target_class='Objective',
                                         python_command='python',
-                                        objective_parameter_file='penalties.json'
+                                        objective_parameter_file='penalties.json',
+                                        sample_generator_name=args.generator
                                         )
 
     chain = ismo.submit.Chain(args.number_of_samples_per_iteration, submitter,
                               commands=commands)
 
     chain.run()
+    
