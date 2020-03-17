@@ -111,8 +111,8 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                 if should_run:
                     subprocess.run(command_to_run, check=True)
                     
-def get_competitor_basename(args.basename):
-    return f'{args.basename}_competitor'
+def get_competitor_basename(basename):
+    return f'{basename}_competitor'
 
 def get_iteration_sizes(starting_size, batch_size_factor, compute_budget):
     iteration_sizes = [starting_size]
