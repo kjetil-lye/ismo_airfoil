@@ -1,7 +1,7 @@
 import ismo
 import ismo.submit
 import ismo.submit.defaults
-import sys
+import os
 
 
 class SeveralVariablesCommands(ismo.submit.defaults.Commands):
@@ -13,51 +13,56 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
 
          self.number_of_processes=number_of_processes
 
-         self.preproccsed_filename_base = self.prefix + 'preprocessed_values_{}.txt'
-         self.simulated_output_filename_base = self.prefix + 'simulation_output_{}.txt'
+         self.preproccsed_filename_base = self.prefix + 'preprocessed_values.txt'
+         self.simulated_output_filename_base = self.prefix + 'simulation_output.txt'
 
      def do_evolve(self, submitter,
                    *,
                    iteration_number: int,
                    input_parameters_file: str,
                    output_value_files: list):
-         # Preprocess
-         preprocess = ismo.submit.Command([self.python_command, 'preprocess.py'])
-         output_preprocess = self.preproccsed_filename_base.format(iteration_number)
-         preprocess = preprocess.with_long_arguments(input_parameters_file=input_parameters_file,
-                                                     output_parameters_file=output_preprocess,
-                                                     sample_start=self.current_sample_number)
-         submitter(preprocess, wait_time_in_hours=24)
 
          # Evolve
-
-         evolve = ismo.submit.Command(['mpirun', '-np', str(self.number_of_processes[iteration_number]), self.python_command, 'simulate_airfoil.py'])
-         simulated_output_filename = self.simulated_output_filename_base.format(iteration_number)
-         evolve = evolve.with_long_arguments(input_parameters_file=output_preprocess,
-                                             output_values_file=simulated_output_filename,
+         evolve = ismo.submit.Command(['mpirun', '-np', 
+                                       str(self.number_of_processes[iteration_number]),
+                                       self.python_command,
+                                       'simulate_airfoil.py'])
+         
+         evolve = evolve.with_long_arguments(input_parameters_file=input_parameters_file,
+                                             output_values_files=output_value_files,
                                              iteration_number=iteration_number,
                                              starting_sample=self.current_sample_number)
+         
+         evolve = self.add_start_end_values(evolve)
+                                             
+         
+         evolve = evolve.with_boolean_argument('output_append')
+         
          submitter(evolve, wait_time_in_hours=24, number_of_processes=self.number_of_processes[iteration_number])
 
-         # Postprocess
-         postprocess = ismo.submit.Command([self.python_command, 'postprocess.py'])
-         postprocess = postprocess.with_long_arguments(input_values_file=simulated_output_filename,
-                                                       output_values_files=output_value_files)
-         submitter(postprocess, wait_time_in_hours=24)
          self.current_sample_number = self.number_of_samples_generated
 
 
 if __name__ == '__main__':
+    files_to_delete = ['parameters.txt', 'model_{}.h5', 'values_{}.txt',
+                       'parameters_for_optimization.txt']
+    
+    for filename_template in files_to_delete:
+        for component in range(3):
+            filename = filename_template.format(component)
+            if os.path.exists(filename):
+                os.remove(filename)
+            
     import argparse
 
     parser = argparse.ArgumentParser(description="""
 Submits all the jobs for the sine experiments
         """)
 
-    parser.add_argument('--number_of_processes', type=int, default=[1], nargs='+',
+    parser.add_argument('--number_of_processes', type=int, default=[1], nargs='+', required=True,
                         help='Number of processes to use (for MPI, only applies to simulation step)')
 
-    parser.add_argument('--number_of_samples_per_iteration', type=int, nargs='+',
+    parser.add_argument('--number_of_samples_per_iteration', type=int, nargs='+', required=True,
                         help='Number of samples per iteration')
 
     parser.add_argument('--chain_name', type=str, default="several",
@@ -108,7 +113,9 @@ Submits all the jobs for the sine experiments
                                         optimize_target_class='Objective',
                                         python_command='python',
                                         objective_parameter_file='penalties.json',
-                                        sample_generator_name=args.generator
+                                        sample_generator_name=args.generator,
+                                        output_append=True,
+                                        reuse_model=True
                                         )
 
     chain = ismo.submit.Chain(args.number_of_samples_per_iteration, submitter,
