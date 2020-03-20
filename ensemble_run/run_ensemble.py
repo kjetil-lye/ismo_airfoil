@@ -6,6 +6,7 @@ import sys
 import subprocess
 import glob
 import json
+from ismo.submit import get_current_repository
 
 def all_successfully_completed():
     lsf_files = glob.glob('lsf.o*')
@@ -35,7 +36,7 @@ class PathForNuwtun:
                           'src-utl',
                           'py-wrap']
 
-        newtun_paths = [f'{os.getcwd()}/nuwtun_solver/{p}' for p in newtun_folders]
+        newtun_paths = [f'{get_current_repository()}/nuwtun_solver/{p}' for p in newtun_folders]
         newtun_added_path = ':'.join(newtun_paths)
         os.environ['PATH'] = f'{newtun_added_path}:{os.environ["PATH"]}'
     def __exit__(self, type, value, traceback):
@@ -70,7 +71,6 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
         os.mkdir(folder_name)
     with ChangeFolder(folder_name):
         if not only_missing:
-            shutil.copytree(os.path.join(repository_path, 'nuwtun_solver'), 'nuwtun_solver')
             shutil.copytree(os.path.join(repository_path, 'airfoil_chain'), 'airfoil_chain')
 
 

@@ -1,5 +1,6 @@
 import numpy as np
 import os.path
+from ismo.submit import get_current_repository
 
 if __name__ == '__main__':
     import argparse
@@ -31,10 +32,15 @@ Runs some complicated function on the input parameters
 
     parser.add_argument('--output_append', action='store_true',
                         help='Append output to end of file')
+    
+    parser.add_argument('--path_to_main_dir', default=os.path.join(get_current_repository(), 'nuwtun_solver/examples/coupled_with_solver'),
+                        help='Append output to end of file')
 
-    path_to_main_dir ='../nuwtun_solver/examples/coupled_with_solver'
+    
 
     args = parser.parse_args()
+    
+    path_to_main_dir = args.path_to_main_dir
     starting_sample_id = args.starting_sample
     iteration_number = args.iteration_number
 
@@ -75,8 +81,6 @@ Runs some complicated function on the input parameters
             if args.output_append:
                 if os.path.exists(args.output_values_files[k]):
                     previous_values = np.loadtxt(args.output_values_files[k])
-                    print(f'values[k].shape = {values[k].shape}')
-                    print(f'previous_values[k].shape = {previous_values.shape}')
         
                     new_values = np.zeros((values[k].shape[0] + previous_values.shape[0]))
         

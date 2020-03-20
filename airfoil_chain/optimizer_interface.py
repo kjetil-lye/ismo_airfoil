@@ -6,31 +6,32 @@
 import os
 import numpy as np
 from mpi4py import MPI
-
+import shutil
 
 def create_sample(s, params, mdir):
 
     #print ("  --- CREATING SAMPLE DIRECTORY SAMPLE_%d\n" %s)
     # Check if necessary input files are available
     file_dir     = mdir + "/files"
+    
+    
     assert(os.path.isdir(mdir))
     assert(os.path.isdir(file_dir))
 
-    comline = 'rm -rf '+mdir+'/SAMPLE_'+str(s)
+    comline = 'rm -rf SAMPLE_'+str(s)
     os.system(comline)
-    
-    comline = 'cp -r ' + file_dir + ' ' + mdir+'/SAMPLE_'+str(s)
-    os.system(comline)
+
+    shutil.copytree(file_dir, f'SAMPLE_{s}')
 
     hh_param = rnd_transform(params[1::], params[0])
     
-    np.savetxt(mdir+'/SAMPLE_'+str(s)+'/shape.dat', hh_param, fmt='%.10e')
+    np.savetxt('SAMPLE_'+str(s)+'/shape.dat', hh_param, fmt='%.10e')
     
 def launch_solver(s, mdir):
     #print ("  --- LAUNCHING JOB FOR SAMPLE %d" %s )
     cwd = os.getcwd()
 
-    os.chdir(mdir+'/SAMPLE_'+str(s))
+    os.chdir('SAMPLE_'+str(s))
         
     comline = 'nuwtun_rae_pywrap.py input.param'
     os.system(comline)
@@ -47,10 +48,12 @@ def combine_data(st, N, mdir, r):
     QoI = np.zeros((N, 4))
     for i in range(N):
         sample = st+i
-        sdata_file = mdir+'/SAMPLE_'+str(sample)+'/sim_data.txt'
+        sdata_file ='SAMPLE_'+str(sample)+'/sim_data.txt'
+        
         QoI[i, 0]   = sample
         QoI[i, 1::] = np.loadtxt(sdata_file)
-   
+    # Save space
+    shutil.rmtree('SAMPLE_'+str(sample), ignore_errors=True)
     return QoI
 
 def rnd_transform(x,s):
