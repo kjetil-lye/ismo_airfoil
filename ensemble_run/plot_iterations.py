@@ -42,8 +42,10 @@ if __name__ == '__main__':
                     for iteration in range(len(iterations)):
 
                         output_objective = os.path.join(output_folder,
-                                                     f'objective_{iteration}.txt')
-                        values = np.loadtxt(output_objective)
+                                                     f'objective.txt')
+                        start_index = sum(iterations[:iteration])
+                        end_index = sum(iterations[:iteration + 1])
+                        values = np.loadtxt(output_objective)[start_index:end_index]
                         values = values[~np.isnan(values)]
                         min_value = np.min(values)
                         if iteration > 0:
@@ -57,20 +59,22 @@ if __name__ == '__main__':
 
                     for iteration in range(len(iterations)):
                         all_values = []
-                        for pass_number in [0, 1]:
-                            number_of_samples = sum(iterations[:iteration+1])
-                            
-                            competitor_basename = get_competitor_basename(configuration['basename'])
-                            output_folder = get_configuration_name(configuration['basename'],
-                                                           rerun, number_of_samples//2,
-                                                           1)
-                            
-                            output_objective = os.path.join(output_folder,
-                                                     f'objective_1.txt')
+                        
+                        number_of_samples = sum(iterations[:iteration+1])
+                        
+                        competitor_basename = get_competitor_basename(configuration['basename'])
+                        output_folder = get_configuration_name(configuration['basename'],
+                                                       rerun, number_of_samples//2,
+                                                       1)
+                        
+                        output_objective = os.path.join(output_folder,
+                                                 f'objective.txt')
 
-                            values = np.loadtxt(output_objective)
-                            values = values[~np.isnan(values)]
-                            all_values.extend(values)
+                        values = np.loadtxt(output_objective)
+                        
+                        assert(values.shape[0] == number_of_samples)
+                        values = values[~np.isnan(values)]
+                        all_values.extend(values)
 
 
                         min_value = np.min(all_values)
@@ -89,7 +93,7 @@ if __name__ == '__main__':
                              fmt='*', uplims=True, lolims=True)
 
                 print("#"*80)
-                print(f"starting_size = {starting_size}, batch_size = {batch_size}")
+                print(f"starting_size = {starting_size}, batch_size_factor = {batch_size_factor}")
                 print(f"mean(ismo)={np.mean(min_value_per_iteration, 1)}\n"
                       f" var(ismo)={np.mean(min_value_per_iteration, 1)}\n"
                       f"\n"
@@ -99,9 +103,9 @@ if __name__ == '__main__':
                 plt.xlabel("Iteration $k$")
                 plt.ylabel("$\\mathbb{E}( J(x_k^*))$")
                 plt.legend()
-                plt.title("script: {}, generator: {}, batch_size: {},\nstarting_size: {}".format(
-                    python_script, generator, batch_size, starting_size))
-                plot_info.savePlot("{script}_objective_{generator}_{batch_size}_{starting_size}".format(
+                plt.title("script: {}, generator: {}, batch_size_factor: {},\nstarting_size: {}".format(
+                    python_script, generator, batch_size_factor, starting_size))
+                plot_info.savePlot("{script}_objective_{generator}_{batch_size_factor}_{starting_size}".format(
                     script=python_script.replace(".py", ""),
                     batch_size=iterations[1],
                     starting_size=starting_size,
