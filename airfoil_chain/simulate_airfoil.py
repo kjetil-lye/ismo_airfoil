@@ -64,19 +64,20 @@ Runs some complicated function on the input parameters
     values = opi.run_simulator(starting_sample_id, parameters, path_to_main_dir)
     
     
-    # Again reformat values to fit with the rest of the chain
-    values_new =[np.zeros(values.shape[0]) for k in range(values.shape[1]-1)]
-
-
-
-    for n in range(values.shape[0]):
-        for k in range(values.shape[1]-1):
-            values_new[k][n] = values[n, k+1]
     
-    values = values_new
     
     
     if(rank == 0):
+        # Again reformat values to fit with the rest of the chain
+        values_new =[np.zeros(values.shape[0]) for k in range(values.shape[1]-1)]
+    
+    
+    
+        for n in range(values.shape[0]):
+            for k in range(values.shape[1]-1):
+                values_new[k][n] = values[n, k+1]
+        
+        values = values_new
         for k in range(len(values)):
             if args.output_append:
                 if os.path.exists(args.output_values_files[k]):

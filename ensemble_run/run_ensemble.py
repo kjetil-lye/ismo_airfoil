@@ -78,7 +78,7 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
         with PathForNuwtun():
             with ChangeFolder('airfoil_chain'):
                 starting_sample = rerun * sum(iteration_sizes)
-                iteration_sizes_as_str = [str(x) for x in iteration_sizes]
+                iteration_sizes_as_str = [str(int(x)) for x in iteration_sizes]
                 command_to_run = [sys.executable,
                                   'submit_airfoil.py',
                                   '--number_of_samples_per_iteration',

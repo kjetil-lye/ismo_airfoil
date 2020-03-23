@@ -7,6 +7,7 @@ import os
 import numpy as np
 from mpi4py import MPI
 import shutil
+import subprocess
 
 def create_sample(s, params, mdir):
 
@@ -18,8 +19,8 @@ def create_sample(s, params, mdir):
     assert(os.path.isdir(mdir))
     assert(os.path.isdir(file_dir))
 
-    comline = 'rm -rf SAMPLE_'+str(s)
-    os.system(comline)
+    
+    shutil.rmtree('SAMPLE_'+str(s), ignore_errors=True)
 
     shutil.copytree(file_dir, f'SAMPLE_{s}')
 
@@ -34,20 +35,20 @@ def launch_solver(s, mdir):
     os.chdir('SAMPLE_'+str(s))
         
     comline = 'nuwtun_rae_pywrap.py input.param'
-    os.system(comline)
+    subprocess.run(comline.split(), check=True)
         
     os.chdir(cwd)
     
     #print('      ...SAMPLE %d done' %(s))
     
-def combine_data(st, N, mdir, r):
+def combine_data(sample_offset, N, mdir, r):
 
     if(r == 0):
         print ("  --- COMBINING DATA\n")
 
     QoI = np.zeros((N, 4))
     for i in range(N):
-        sample = st+i
+        sample = sample_offset + i
         sdata_file ='SAMPLE_'+str(sample)+'/sim_data.txt'
         
         QoI[i, 0]   = sample
@@ -64,26 +65,29 @@ def rnd_transform(x,s):
     return x
 
 
-def run_simulator(sample_start, parameters, path_to_main):
+def run_simulator(sample_offset, parameters, path_to_main):
 
     Nsamples   = parameters.shape[0]
 
     comm  = MPI.COMM_WORLD
     rank  = comm.Get_rank()
     nproc = comm.Get_size()
-
-    assert(Nsamples == nproc)
+    
+    samples_per_proc = (Nsamples + nproc - 1) // nproc
+    
+    sample_index_start = rank * samples_per_proc
+    sample_index_end = min(Nsamples, (rank+1)*samples_per_proc)
 
     if(rank==0):
-        print ("\n  --- SIMULATING SAMPLES %d - %d\n" %(sample_start,sample_start+Nsamples-1))
+        print ("\n  --- SIMULATING SAMPLES %d - %d\n" %(sample_offset,sample_offset+Nsamples-1))
 
-    for i in range(nproc):
-
-        if(i==rank):
-            sample = sample_start+i
-            assert(int(parameters[i,0]) == sample)
-            create_sample(sample, parameters[i,:], path_to_main)
-            launch_solver(sample, path_to_main)
+    for sample_index in range(sample_index_start, sample_index_end):
+        sample = sample_index + sample_offset
+        assert(int(parameters[sample_index,0]) == sample)
+        create_sample(sample, parameters[sample_index,:], path_to_main)
+        launch_solver(sample, path_to_main)
     comm.barrier()
-
-    return combine_data(sample_start, Nsamples, path_to_main, rank)
+    if rank == 0:
+        return combine_data(sample_offset, Nsamples, path_to_main, rank)
+    else:
+        return None
