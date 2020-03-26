@@ -53,8 +53,8 @@ def combine_data(sample_offset, N, mdir, r):
         
         QoI[i, 0]   = sample
         QoI[i, 1::] = np.loadtxt(sdata_file)
-    # Save space
-    shutil.rmtree('SAMPLE_'+str(sample), ignore_errors=True)
+        # Save space
+        shutil.rmtree('SAMPLE_'+str(sample), ignore_errors=True)
     return QoI
 
 def rnd_transform(x,s):
@@ -73,7 +73,11 @@ def run_simulator(sample_offset, parameters, path_to_main):
     rank  = comm.Get_rank()
     nproc = comm.Get_size()
     
+    
     samples_per_proc = (Nsamples + nproc - 1) // nproc
+    
+    if samples_per_proc < 1:
+        raise Exception(f'More processes than samples given, nproc: {nproc}, Nsamples: {Nsamples}')
     
     sample_index_start = rank * samples_per_proc
     sample_index_end = min(Nsamples, (rank+1)*samples_per_proc)

@@ -79,6 +79,10 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
             with ChangeFolder('airfoil_chain'):
                 starting_sample = rerun * sum(iteration_sizes)
                 iteration_sizes_as_str = [str(int(x)) for x in iteration_sizes]
+                
+                for iteration_size in iteration_sizes:
+                    if int(iteration_size) < 1:
+                        raise Exception(f"Iteration size is 0, all iterations sizes: {iteration_sizes}")
                 command_to_run = [sys.executable,
                                   'submit_airfoil.py',
                                   '--number_of_samples_per_iteration',
