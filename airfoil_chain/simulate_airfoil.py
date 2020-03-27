@@ -1,8 +1,10 @@
 import numpy as np
 import os.path
+import sys
 from ismo.submit import get_current_repository
 
 if __name__ == '__main__':
+    print(f"Command line: {' '.join(sys.argv)}")
     import argparse
     from mpi4py import MPI
     import optimizer_interface as opi
