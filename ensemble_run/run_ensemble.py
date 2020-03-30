@@ -67,7 +67,7 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
     batch_size_factor = iteration_sizes[0]/iteration_sizes[1]
 
     folder_name = get_configuration_name(basename, rerun, starting_size, batch_size_factor)
-    if not only_missing:
+    if not only_missing or not os.path.exists(folder_name):
         os.mkdir(folder_name)
     with ChangeFolder(folder_name):
         if only_missing:
