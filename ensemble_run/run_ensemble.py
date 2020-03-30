@@ -70,7 +70,9 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
     if not only_missing:
         os.mkdir(folder_name)
     with ChangeFolder(folder_name):
-        if not only_missing:
+        if only_missing:
+            should_run = not os.path.exists('airfoil_chain')
+        if not only_missing or not os.path.exists('airfoil_chain'):
             shutil.copytree(os.path.join(repository_path, 'airfoil_chain'), 'airfoil_chain')
 
 
@@ -108,7 +110,7 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                     command_to_run.append('--dry_run')
 
                 if only_missing:
-                    should_run = all_successfully_completed()
+                    should_run = should_run or all_successfully_completed()
                 else:
                     should_run = True
 
