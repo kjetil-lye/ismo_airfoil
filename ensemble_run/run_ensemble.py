@@ -110,7 +110,7 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                     command_to_run.append('--dry_run')
 
                 if only_missing:
-                    should_run = should_run or all_successfully_completed()
+                    should_run = should_run or not all_successfully_completed()
                 else:
                     should_run = True
 
