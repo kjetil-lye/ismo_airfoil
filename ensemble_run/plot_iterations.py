@@ -86,7 +86,7 @@ if __name__ == '__main__':
                         except:
                             pass
 
-                iteration_range = np.arange(0, iterations)
+                iteration_range = np.arange(0, len(iterations))
                 plt.errorbar(iteration_range, np.mean(min_value_per_iteration, 1),
                              yerr=np.std(min_value_per_iteration, 1), label='ISMO',
                              fmt='o', uplims=True, lolims=True)
