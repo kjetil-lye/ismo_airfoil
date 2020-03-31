@@ -41,45 +41,50 @@ if __name__ == '__main__':
                                                            rerun, starting_size, batch_size_factor)
                     for iteration in range(len(iterations)):
 
-                        output_objective = os.path.join(output_folder,
-                                                     f'objective.txt')
-                        start_index = sum(iterations[:iteration])
-                        end_index = sum(iterations[:iteration + 1])
-                        values = np.loadtxt(output_objective)[start_index:end_index]
-                        values = values[~np.isnan(values)]
-                        min_value = np.min(values)
-                        if iteration > 0:
-                            min_value = min(min_value, np.min(min_value_per_iteration[:iteration,rerun]))
-
-                        min_value_per_iteration[iteration, rerun] = min_value
-
+                        try:
+                            output_objective = os.path.join(output_folder,
+                                                         f'objective.txt')
+                            start_index = sum(iterations[:iteration])
+                            end_index = sum(iterations[:iteration + 1])
+                            values = np.loadtxt(output_objective)[start_index:end_index]
+                            values = values[~np.isnan(values)]
+                            min_value = np.min(values)
+                            if iteration > 0:
+                                min_value = min(min_value, np.min(min_value_per_iteration[:iteration,rerun]))
+    
+                            min_value_per_iteration[iteration, rerun] = min_value
+                        except:
+                            pass
 
                 min_value_per_iteration_competitor = np.zeros((len(iterations), number_of_reruns))
                 for rerun in range(number_of_reruns):
 
                     for iteration in range(len(iterations)):
-                        all_values = []
-                        
-                        number_of_samples = sum(iterations[:iteration+1])
-                        
-                        competitor_basename = get_competitor_basename(configuration['basename'])
-                        output_folder = get_configuration_name(configuration['basename'],
-                                                       rerun, number_of_samples//2,
-                                                       1)
-                        
-                        output_objective = os.path.join(output_folder,
-                                                 f'objective.txt')
-
-                        values = np.loadtxt(output_objective)
-                        
-                        assert(values.shape[0] == number_of_samples)
-                        values = values[~np.isnan(values)]
-                        all_values.extend(values)
-
-
-                        min_value = np.min(all_values)
-
-                        min_value_per_iteration_competitor[iteration, rerun] = min_value
+                        try:
+                            all_values = []
+                            
+                            number_of_samples = sum(iterations[:iteration+1])
+                            
+                            competitor_basename = get_competitor_basename(configuration['basename'])
+                            output_folder = get_configuration_name(configuration['basename'],
+                                                           rerun, number_of_samples//2,
+                                                           1)
+                            
+                            output_objective = os.path.join(output_folder,
+                                                     f'objective.txt')
+    
+                            values = np.loadtxt(output_objective)
+                            
+                            assert(values.shape[0] == number_of_samples)
+                            values = values[~np.isnan(values)]
+                            all_values.extend(values)
+    
+    
+                            min_value = np.min(all_values)
+    
+                            min_value_per_iteration_competitor[iteration, rerun] = min_value
+                        except:
+                            pass
 
                 iteration_range = np.arange(0, iterations)
                 plt.errorbar(iteration_range, np.mean(min_value_per_iteration, 1),
