@@ -59,7 +59,7 @@ def get_stacktrace_str():
 
 
 def get_loaded_python_modules():
-    module_names = copy.deepcopy(sys.modules.keys())
+    module_names = copy.copy(sys.modules.keys())
 
     modules_dictionaries = []
 
