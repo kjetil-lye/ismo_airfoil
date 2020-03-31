@@ -110,7 +110,7 @@ if __name__ == '__main__':
                 plt.legend()
                 plt.title("script: {}, generator: {}, batch_size_factor: {},\nstarting_size: {}".format(
                     python_script, generator, batch_size_factor, starting_size))
-                plot_info.savePlot("{script}_objective_{generator}_{batch_size_factor}_{starting_size}".format(
+                plot_info.savePlot("{script}_objective_{generator}_{batch_size}_{starting_size}".format(
                     script=python_script.replace(".py", ""),
                     batch_size=iterations[1],
                     starting_size=starting_size,
