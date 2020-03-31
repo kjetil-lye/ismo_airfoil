@@ -54,7 +54,7 @@ if __name__ == '__main__':
     
                             min_value_per_iteration[iteration, rerun] = min_value
                         except:
-                            pass
+                             print(f"Failing {batch_size_factor} {starting_size} {generator}")
 
                 min_value_per_iteration_competitor = np.zeros((len(iterations), number_of_reruns))
                 for rerun in range(number_of_reruns):
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     
                             min_value_per_iteration_competitor[iteration, rerun] = min_value
                         except:
-                            pass
+                            print(f"Failing {batch_size_factor} {starting_size} {generator}")
 
                 iteration_range = np.arange(0, len(iterations))
                 plt.errorbar(iteration_range, np.mean(min_value_per_iteration, 1),
