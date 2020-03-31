@@ -9,7 +9,7 @@ import sys
 import os
 import subprocess
 import ismo.submit
-import validation.config
+import json
 import plot_info
 import collections
 from run_ensemble import get_configuration_name, get_iteration_sizes, get_competitor_basename
@@ -35,7 +35,7 @@ if __name__ == '__main__':
                 
                 number_of_reruns = configuration['number_of_reruns']
                 
-                min_value_per_iteration = np.zeros((iterations, number_of_reruns))
+                min_value_per_iteration = np.zeros((len(iterations), number_of_reruns))
                 for rerun in range(number_of_reruns):
                     output_folder = get_configuration_name(configuration['basename'],
                                                            rerun, starting_size, batch_size_factor)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
                         min_value_per_iteration[iteration, rerun] = min_value
 
 
-                min_value_per_iteration_competitor = np.zeros((iterations, number_of_reruns))
+                min_value_per_iteration_competitor = np.zeros((len(iterations), number_of_reruns))
                 for rerun in range(number_of_reruns):
 
                     for iteration in range(len(iterations)):
