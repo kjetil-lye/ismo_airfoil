@@ -34,9 +34,6 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
                                              starting_sample=self.current_sample_number)
          
          evolve = self.add_start_end_values(evolve)
-                                             
-         
-         evolve = evolve.with_boolean_argument('output_append')
          
          submitter(evolve, wait_time_in_hours=24, number_of_processes=self.number_of_processes[iteration_number])
 
