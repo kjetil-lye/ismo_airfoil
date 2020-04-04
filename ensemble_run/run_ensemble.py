@@ -57,7 +57,7 @@ class ChangeFolder:
 
 
 def get_configuration_name(basename, rerun, starting_size, batch_size_factor):
-    return f'{basename}_rerun_{rerun}_iterations_{starting_size}_{batch_size_factor}'
+    return f'{basename}_rerun_{rerun}_iterations_{starting_size}_{float(batch_size_factor)}'
 
 
 

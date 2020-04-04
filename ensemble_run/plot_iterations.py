@@ -37,8 +37,8 @@ if __name__ == '__main__':
                 
                 min_value_per_iteration = np.zeros((len(iterations), number_of_reruns))
                 for rerun in range(number_of_reruns):
-                    output_folder = get_configuration_name(configuration['basename'],
-                                                           rerun, starting_size, batch_size_factor)
+                    output_folder = os.path.join(get_configuration_name(configuration['basename'],
+                                                                        rerun, starting_size, batch_size_factor**(-1)), 'airfoil_chain')
                     for iteration in range(len(iterations)):
 
                         try:
@@ -53,9 +53,11 @@ if __name__ == '__main__':
                                 min_value = min(min_value, np.min(min_value_per_iteration[:iteration,rerun]))
     
                             min_value_per_iteration[iteration, rerun] = min_value
-                        except:
+                        except Exception as e:
+                             print(f"Looking for file {output_objective}")
+                             print(str(e))
                              print(f"Failing {batch_size_factor} {starting_size} {generator}")
-
+                
                 min_value_per_iteration_competitor = np.zeros((len(iterations), number_of_reruns))
                 for rerun in range(number_of_reruns):
 
@@ -66,9 +68,9 @@ if __name__ == '__main__':
                             number_of_samples = sum(iterations[:iteration+1])
                             
                             competitor_basename = get_competitor_basename(configuration['basename'])
-                            output_folder = get_configuration_name(configuration['basename'],
+                            output_folder = os.path.join(get_configuration_name(competitor_basename,
                                                            rerun, number_of_samples//2,
-                                                           1)
+                                                           1), "airfoil_chain")
                             
                             output_objective = os.path.join(output_folder,
                                                      f'objective.txt')
@@ -83,10 +85,15 @@ if __name__ == '__main__':
                             min_value = np.min(all_values)
     
                             min_value_per_iteration_competitor[iteration, rerun] = min_value
-                        except:
-                            print(f"Failing {batch_size_factor} {starting_size} {generator}")
+                        except Exception as e:
+                             print(f"Looking for file {output_objective}")
+                             print(str(e))
+                             print(f"Failing {batch_size_factor} {starting_size} {generator}")
+
+
 
                 iteration_range = np.arange(0, len(iterations))
+
                 plt.errorbar(iteration_range, np.mean(min_value_per_iteration, 1),
                              yerr=np.std(min_value_per_iteration, 1), label='ISMO',
                              fmt='o', uplims=True, lolims=True)
