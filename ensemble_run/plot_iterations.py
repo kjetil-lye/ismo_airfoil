@@ -154,7 +154,7 @@ if __name__ == '__main__':
                     if source_name == "objective":
                         plt.ylabel("$\\mathbb{E}( J(x_k^*))$")
                     else:
-                        plt.ylabel(f"$\\mathrm{{source_name}}(x_k^*)$")
+                        plt.ylabel(f"$\\mathrm{{{source_name}}}(x_k^*)$")
                         
                     plt.legend()
                     plt.title("type: {}, script: {}, generator: {}, batch_size_factor: {},\nstarting_size: {}".format(
