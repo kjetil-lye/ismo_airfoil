@@ -241,7 +241,8 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   only_missing=args.only_missing,
                                   container_type=args.container_type,
                                   container=args.container,
-                                  sample_generator=args.generator)
+                                  sample_generator=args.generator,
+                                  optimizer=args.optimizer)
             
                     
                 
