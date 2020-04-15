@@ -83,6 +83,10 @@ Submits all the jobs for the sine experiments
 
     parser.add_argument('--container', type=str, default='docker://kjetilly/machine_learning_base:0.1.2',
                         help='Container name')
+    
+    
+    parser.add_argument('--optimizer', type=str, default='L-BFGS-B',
+                        help='Name of optimizer')
 
     args = parser.parse_args()
 
@@ -113,7 +117,8 @@ Submits all the jobs for the sine experiments
                                         sample_generator_name=args.generator,
                                         output_append=True,
                                         reuse_model=True,
-                                        optimization_results_filename='optimization_results.pic'
+                                        optimization_results_filename='optimization_results.pic',
+                                        optimizer_name=args.optimizer
                                         )
 
     chain = ismo.submit.Chain(args.number_of_samples_per_iteration, submitter,

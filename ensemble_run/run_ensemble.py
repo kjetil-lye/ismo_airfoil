@@ -62,7 +62,7 @@ def get_configuration_name(basename, rerun, starting_size, batch_size_factor):
 
 
 def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name, only_missing, container, container_type,
-                      sample_generator):
+                      sample_generator, optimizer):
     starting_size = iteration_sizes[0]
     batch_size_factor = iteration_sizes[0]/iteration_sizes[1]
 
@@ -98,7 +98,9 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                                   '--chain_name',
                                   folder_name,
                                   '--generator',
-                                  sample_generator
+                                  sample_generator,
+                                  '--optimizer',
+                                  optimizer
                                   ]
 
                 if container is not None:
@@ -176,7 +178,9 @@ Runs the ensemble for M different runs (to get some statistics)./
     parser.add_argument('--generator', type=str, default="monte-carlo",
                         help="Generator to use (either 'monte-carlo' or 'sobol'")
                         
-
+    
+    parser.add_argument('--optimizer', type=str, default='L-BFGS-B',
+                        help='Name of optimizer')
 
 
     args = parser.parse_args()
@@ -206,7 +210,8 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   only_missing=args.only_missing,
                                   container_type=args.container_type,
                                   container=args.container,
-                                  sample_generator=args.generator)
+                                  sample_generator=args.generator,
+                                  optimizer=args.optimizer)
             
             
             for iteration_number, iteration_size in enumerate(iteration_sizes):
