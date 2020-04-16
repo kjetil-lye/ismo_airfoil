@@ -53,7 +53,6 @@ class WithObjective:
         
         self.lift_drag_areas.append(lift_drag_area)
         self.objective_values.append(value)
-        print(f'value = {value}')
         return value
     
 
@@ -141,7 +140,6 @@ Runs some complicated function on the input parameters
         
         all_values.append(with_objective.objective_values)
         all_lift_drag_areas.append(with_objective.lift_drag_areas)
-        print(optimization_results)
     comm.barrier()
     
     output_to_save = {
