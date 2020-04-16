@@ -16,6 +16,7 @@ import sys
 from ismo.submit import get_current_repository
 from ismo.optimizers import make_bounds
 import shutil
+import pickle
 
 
 class AirfoilComputer:
@@ -42,9 +43,16 @@ class WithObjective:
     def __init__(self, objective, computer):
         self.objective = objective
         self.computer = computer
+        self.lift_drag_areas = []
+        self.objective_values = []
+        
         
     def __call__(self, parameter):
-        value = self.objective(self.computer(parameter))
+        lift_drag_area = self.computer(parameter)
+        value = self.objective(lift_drag_area)
+        
+        self.lift_drag_areas.append(lift_drag_area)
+        self.objective_values.append(value)
         print(f'value = {value}')
         return value
     
@@ -53,7 +61,6 @@ if __name__ == '__main__':
     print(f"Command line: {' '.join(sys.argv)}")
     import argparse
     from mpi4py import MPI
-    import optimizer_interface as opi
     from ismo.samples import create_sample_generator
 
     parser = argparse.ArgumentParser(description="""
@@ -106,10 +113,21 @@ Runs some complicated function on the input parameters
     
     nproc = comm.Get_size()
     
+    assert(nproc <= args.number_of_samples)
+    
     samples_per_proc = (args.number_of_samples + nproc - 1) // nproc
     
     sample_index_start = rank * samples_per_proc
-    sample_index_end = min(args.number_of_samples, (rank+1)*samples_per_proc)
+    sample_index_end = min(args.number_of_samples, (rank + 1)*samples_per_proc)
+    
+    
+    
+    all_optimization_results = []
+    all_values = []
+    all_lift_drag_areas = []
+    
+    if rank == 0:
+        np.savetxt("traditional_optimization_parameters.txt", parameters)
     
     for sample_index in range(sample_index_start, sample_index_end):
         computer = AirfoilComputer(sample_index, args.path_to_main)
@@ -119,7 +137,23 @@ Runs some complicated function on the input parameters
         optimization_results = scipy.optimize.minimize(with_objective, 
                                                        parameters[sample_index-args.starting_sample],
                                                        bounds=make_bounds([0,1], parameters[sample_index-args.starting_sample]))
+        all_optimization_results.append(optimization_results)
         
+        all_values.append(with_objective.objective_values)
+        all_lift_drag_areas.append(with_objective.lift_drag_areas)
         print(optimization_results)
+    comm.barrier()
+    
+    output_to_save = {
+            "all_optimization_results" : all_optimization_results,
+            "all_values" : all_values,
+            "all_lift_drag_areas" : all_lift_drag_areas}
+    
+    for name, array in output_to_save.items():
+        full_array = comm.gather(array, root=0)
+        if rank == 0:
+            with open(f'traditional_optimization_{name}.pic', 'wb') as outputfile:
+                pickle.dump(array, outputfile)
+        
         
     
