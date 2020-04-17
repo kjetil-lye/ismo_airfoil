@@ -53,7 +53,6 @@ class WithObjective:
         
         self.lift_drag_areas.append(lift_drag_area)
         self.objective_values.append(value)
-        print(f'value = {value}')
         return value
     
 
@@ -153,7 +152,7 @@ Runs some complicated function on the input parameters
         full_array = comm.gather(array, root=0)
         if rank == 0:
             with open(f'traditional_optimization_{name}.pic', 'wb') as outputfile:
-                pickle.dump(array, outputfile)
+                pickle.dump(full_array, outputfile)
         
         
     
