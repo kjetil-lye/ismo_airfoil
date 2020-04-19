@@ -80,6 +80,10 @@ Runs some complicated function on the input parameters
     
     parser.add_argument('--path_to_main', default=os.path.join(get_current_repository(), 'nuwtun_solver/examples/coupled_with_solver'),
                         help='Append output to end of file')
+
+    parser.add_argument('--maxiter', type=int, default=-1,
+                        help='Maximum number of iterations (-1 = unlimited)')
+
     args = parser.parse_args()
 
     
@@ -133,9 +137,12 @@ Runs some complicated function on the input parameters
         
         with_objective = WithObjective(objective_function, computer)
         
+        options = {}
+        if args.maxiter != -1:
+            options['maxiter'] = args.maxiter
         optimization_results = scipy.optimize.minimize(with_objective, 
                                                        parameters[sample_index-args.starting_sample],
-                                                       bounds=make_bounds([0,1], parameters[sample_index-args.starting_sample]))
+                                                       bounds=make_bounds([0,1], parameters[sample_index-args.starting_sample]), options=options)
         all_optimization_results.append(optimization_results)
         
         all_values.append(with_objective.objective_values)
