@@ -16,6 +16,7 @@ import os
 import os.path
 import datetime
 import traceback
+import numpy as np
 import inspect
 import copy
 try:
