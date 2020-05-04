@@ -79,8 +79,9 @@ if __name__ == '__main__':
                                 
                                 aux_min_values[aux_name][iteration, rerun] = min_aux_value
 
-                            output_parameters = os.path.join(output_folder,
+                            output_parameters_filename = os.path.join(output_folder,
                                                          f'parameters.txt')
+                            output_parameters = np.loadtxt(output_parameters_filename)
                             min_shapes_per_iteration.append(output_parameters[arg_min_value])
 
                             mean_value = np.mean(min_value_per_iteration, axis=1)
