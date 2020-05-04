@@ -12,7 +12,7 @@ import ismo.submit
 import json
 import plot_info
 import collections
-import logger
+import logging
 from run_ensemble import get_configuration_name, get_iteration_sizes, get_competitor_basename
 
 if __name__ == '__main__':
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                         except Exception as e:
                              print(f"Looking for file {output_objective}")
                              print(str(e))
-                             logger.exception(e)
+                             logging.exception(e)
                              print(f"Failing {batch_size_factor} {starting_size} {generator}")
                 plot_info.saveData(f'min_shapes_per_iteration_{script}_{source_name}_{generator}_{batch_size}_{starting_size}',
                                    min_shapes_per_iteration)
