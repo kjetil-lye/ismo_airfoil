@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
                             index_closest_to_mean_value = abs(mean_value - min_value_per_iteration[iteration, :]).argmin()
 
-                            closest_to_mean_shapes_per_iteration.append(min_value_per_iteration[iteration, index_closest_to_mean_value])
+                            closest_to_mean_shapes_per_iteration.append(output_parameters[index_closest_to_mean_value])
 
                                 
                         except Exception as e:
