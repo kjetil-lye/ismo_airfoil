@@ -84,7 +84,7 @@ if __name__ == '__main__':
                             output_parameters = np.loadtxt(output_parameters_filename)
                             min_shapes_per_iteration.append(output_parameters[arg_min_value])
 
-                            mean_value = np.mean(min_value_per_iteration, axis=1)
+                            mean_value = np.mean(min_value_per_iteration[iteration,:])
 
                             index_closest_to_mean_value = abs(mean_value - min_value_per_iteration[iteration, :]).argmin()
 
