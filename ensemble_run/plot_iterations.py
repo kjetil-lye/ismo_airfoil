@@ -96,10 +96,10 @@ if __name__ == '__main__':
                              print(str(e))
                              logging.exception(e)
                              print(f"Failing {batch_size_factor} {starting_size} {generator}")
-                plot_info.saveData(f'min_shapes_per_iteration_{script}_{source_name}_{generator}_{batch_size}_{starting_size}',
+                plot_info.saveData(f'min_shapes_per_iteration_{python_script}_{generator}_{iterations[1]}_{starting_size}',
                                    min_shapes_per_iteration)
                 plot_info.saveData(
-                    f'closest_to_mean_shapes_per_iteration_{script}_{source_name}_{generator}_{batch_size}_{starting_size}',
+                    f'closest_to_mean_shapes_per_iteration_{python_script}_{generator}_{iterations[1]}_{starting_size}',
                     closest_to_mean_shapes_per_iteration)
                 
                 min_value_per_iteration_competitor = np.zeros((len(iterations), number_of_reruns))
