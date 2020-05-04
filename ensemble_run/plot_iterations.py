@@ -46,6 +46,9 @@ if __name__ == '__main__':
                 
                 aux_min_values = collections.defaultdict(lambda: np.zeros((len(iterations), number_of_reruns)))
 
+                min_shapes_per_iteration = []
+                closest_to_mean_shapes_per_iteration = []
+
                 for rerun in range(number_of_reruns):
                     output_folder = os.path.join(get_configuration_name(configuration['basename'],
                                                                         rerun, starting_size, batch_size_factor**(-1)), 'airfoil_chain')
@@ -74,11 +77,27 @@ if __name__ == '__main__':
                                 min_aux_value = np.loadtxt(output_aux)[arg_min_value]
                                 
                                 aux_min_values[aux_name][iteration, rerun] = min_aux_value
+
+                            output_parameters = os.path.join(output_folder,
+                                                         f'parameters.txt')
+                            min_shapes_per_iteration.append(output_parameters[arg_min_value])
+
+                            mean_value = np.mean(min_value_per_iteration, axis=1)
+
+                            index_closest_to_mean_value = abs(mean_value - min_value_per_iteration[iteration, :]).argmin()
+
+                            closest_to_mean_shapes_per_iteration.append(min_value_per_iteration[iteration, index_closest_to_mean_value])
+
                                 
                         except Exception as e:
                              print(f"Looking for file {output_objective}")
                              print(str(e))
                              print(f"Failing {batch_size_factor} {starting_size} {generator}")
+                plot_info.saveData(f'min_shapes_per_iteration_{script}_{source_name}_{generator}_{batch_size}_{starting_size}',
+                                   min_shapes_per_iteration)
+                plot_info.saveData(
+                    f'closest_to_mean_shapes_per_iteration_{script}_{source_name}_{generator}_{batch_size}_{starting_size}',
+                    closest_to_mean_shapes_per_iteration)
                 
                 min_value_per_iteration_competitor = np.zeros((len(iterations), number_of_reruns))
                 aux_min_values_competitor = collections.defaultdict(lambda: np.zeros((len(iterations), number_of_reruns)))
