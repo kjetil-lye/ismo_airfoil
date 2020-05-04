@@ -35,11 +35,12 @@ if __name__ == '__main__':
      max_number_of_iterations = max(len(sample_array) for sample_array in all_values)
 
 
+     all_minimum_values = []
+     for sample_array in all_values:
      #
-     # for sample_array in all_values:
-     #
-     #     sample_array = np.array(sample_array)
-     #     minimum_sample = cummin(sample_array)
+         sample_array = np.array(sample_array)
+         minimum_sample = cummin(sample_array)
+         all_minimum_values.append(minimum_sample)
      #
      #     number_of_iterations = np.arange(0, minimum_sample.shape[0])
      #
@@ -68,9 +69,11 @@ if __name__ == '__main__':
      min_per_iteration = np.zeros(max_number_of_iterations)
      max_per_iteration = np.zeros(max_number_of_iterations)
 
+
+
      for iteration in range(max_number_of_iterations):
           samples = []
-          for sample_array in all_values:
+          for sample_array in all_minimum_values:
                if len(sample_array) > iteration:
                     samples.append(sample_array[iteration])
           histogram, edges = np.histogram(samples, bins=bins, range=(min_value, max_value))
@@ -97,10 +100,20 @@ if __name__ == '__main__':
      plot_info.showAndSave("optimized_traditional_histograms")
 
      number_of_iterations = np.arange(0, max_number_of_iterations)
-     #plt.fill_between(number_of_iterations, mean_per_iteration-std_per_iteration, mean_per_iteration+std_per_iteration)
-     plt.fill_between(number_of_iterations, min_per_iteration,
-                      max_per_iteration)
-     plt.plot(number_of_iterations, mean_per_iteration)
-     plt.ylim([min_value, max_value])
-     plt.show()
+     plt.fill_between(number_of_iterations, mean_per_iteration-std_per_iteration, mean_per_iteration+std_per_iteration,
+                      alpha=0.5, color='C1', label=r'mean $\pm$ std')
+     #plt.fill_between(number_of_iterations, min_per_iteration,
+     #                 max_per_iteration)
+     plt.plot(number_of_iterations, mean_per_iteration, label='mean')
+     plt.ylim([min_value, 4*max_value])
+     plt.axvline(512, color='grey', linestyle='--')
+     plt.axvline(256, color='green', linestyle='--')
+     plt.axhline(0.55, color='green', linestyle='--')
+     plt.axhline(0.45, color='grey', linestyle='--')
+     plt.xscale('log', basex=2)
+     plt.yscale('log', basey=2)
+     plt.xlabel("Number of evaluations of the simulator")
+     plt.ylabel("Minimum value")
+     plot_info.plot_info.legendLeft()
+     plot_info.showAndSave("optimized_traditional_mean_std")
 
