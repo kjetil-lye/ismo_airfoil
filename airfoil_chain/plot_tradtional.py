@@ -23,12 +23,22 @@ if __name__ == '__main__':
          all_values = pickle.load(inputfile)
      cummin = np.minimum.accumulate
 
+     all_values_new = []
      for sample_array in all_values:
+         if type(sample_array[0]) == list:
+              for sample_array_sub in sample_array:
+                   all_values_new.append(sample_array_sub)
+         else:
+              all_values_new.append(sample_array)
+     
+     for sample_array in all_values:
+     
+         sample_array = np.array(sample_array)
          minimum_sample = cummin(sample_array)
 
          number_of_iterations = np.arange(0, minimum_sample.shape[0])
-
-         plt.loglog(number_of_iterations, minimum_sample, basex=2, basey=2)
+         
+         #plt.loglog(number_of_iterations, minimum_sample, basex=2, basey=2)
         
      plt.axvline(512, color='grey', linestyle='--')
      plt.axvline(256, color='green', linestyle='--')
