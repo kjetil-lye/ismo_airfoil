@@ -359,6 +359,16 @@ def console_log(x):
     else:
         print(x)
 
+def saveData(basefilename, data):
+    if not os.path.exists('results'):
+        os.mkdir('results')
+
+    basefilename = ''.join(ch for ch in basefilename if ch.isalnum() or ch == '_')
+    basefilename = basefilename.lower()
+    outname = os.path.join('results', basefilename + ".txt")
+
+    np.savetxt(outname, data, footer=str(get_plot_metadata()))
+
 def to_percent(y, position):
     # see https://stackoverflow.com/questions/31357611/format-y-axis-as-percent
     s = "{:.1f}".format(y*100)
