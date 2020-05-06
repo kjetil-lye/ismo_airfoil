@@ -92,7 +92,7 @@ if __name__ == '__main__':
                              print(f"Failing {batch_size_factor} {starting_size} {generator}")
                 for iteration in range(len(iterations)):
                     mean_value = np.mean(min_value_per_iteration[iteration, :])
-                    end_index = end_index = sum(iterations[:iteration + 1])
+                    end_index = sum(iterations[:iteration + 1])
                     index_closest_to_mean_value = np.unravel_index(abs(mean_value - value_per_iteration[:end_index, :]).argmin(),
                                                                    value_per_iteration.shape)
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
                                                                         index_closest_to_mean_value[1], starting_size,
                                                                         batch_size_factor ** (-1)), 'airfoil_chain')
 
-                    output_parameters_filename_closest_to_mean = os.path.join(output_folder_closest_to_mean[1],
+                    output_parameters_filename_closest_to_mean = os.path.join(output_folder_closest_to_mean,
                                                               f'parameters.txt')
                     output_parameters_closest_to_mean = np.loadtxt(output_parameters_filename_closest_to_mean)
 
@@ -113,7 +113,7 @@ if __name__ == '__main__':
                                                                         index_min_value[1], starting_size,
                                                                         batch_size_factor ** (-1)), 'airfoil_chain')
 
-                    output_parameters_filename_min_value = os.path.join(output_folder_min_value[1],
+                    output_parameters_filename_min_value = os.path.join(output_folder_min_value,
                                                               f'parameters.txt')
                     output_parameters_min_value = np.loadtxt(output_parameters_filename_min_value)
 
