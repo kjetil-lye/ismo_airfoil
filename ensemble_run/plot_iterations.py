@@ -83,9 +83,6 @@ if __name__ == '__main__':
                                 aux_min_values[aux_name][iteration, rerun] = min_aux_value
 
 
-                            min_shapes_per_iteration.append(output_parameters[arg_min_value])
-
-
 
                                 
                         except Exception as e:
