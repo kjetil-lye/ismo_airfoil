@@ -93,7 +93,7 @@ if __name__ == '__main__':
                 for iteration in range(len(iterations)):
                     mean_value = np.mean(min_value_per_iteration[iteration, :])
                     end_index = end_index = sum(iterations[:iteration + 1])
-                    index_closest_to_mean_value = np.unravel_shape(abs(mean_value - value_per_iteration[:end_index, :]).argmin(),
+                    index_closest_to_mean_value = np.unravel_index(abs(mean_value - value_per_iteration[:end_index, :]).argmin(),
                                                                    value_per_iteration.shape)
 
                     output_folder_closest_to_mean = os.path.join(get_configuration_name(configuration['basename'],
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
                     closest_to_mean_shapes_per_iteration.append(output_parameters_closest_to_mean[index_closest_to_mean_value[0]])
 
-                    index_min_value = np.unravel_shape(value_per_iteration[:end_index, :].argmin(),
+                    index_min_value = np.unravel_index(value_per_iteration[:end_index, :].argmin(),
                                                                    value_per_iteration.shape)
 
                     output_folder_min_value = os.path.join(get_configuration_name(configuration['basename'],
