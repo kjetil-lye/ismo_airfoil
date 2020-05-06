@@ -100,12 +100,12 @@ if __name__ == '__main__':
      plot_info.showAndSave("optimized_traditional_histograms")
 
      number_of_iterations = np.arange(0, max_number_of_iterations)
-     plt.fill_between(number_of_iterations, mean_per_iteration-std_per_iteration, mean_per_iteration+std_per_iteration,
-                      alpha=0.5, color='C1', label=r'mean $\pm$ std')
-     #plt.fill_between(number_of_iterations, min_per_iteration,
-     #                 max_per_iteration)
+     #plt.fill_between(number_of_iterations, mean_per_iteration-std_per_iteration, mean_per_iteration+std_per_iteration,
+     #                alpha=0.5, color='C1', label=r'mean $\pm$ std')
+     plt.fill_between(number_of_iterations, min_per_iteration,
+                      max_per_iteration, alpha=0.5, color='C1', label=r'min-max')
      plt.plot(number_of_iterations, mean_per_iteration, label='mean')
-     plt.ylim([min_value, 4*max_value])
+     #plt.ylim([min_value, 4*max_value])
      plt.axvline(512, color='grey', linestyle='--')
      plt.axvline(256, color='green', linestyle='--')
      plt.axhline(0.55, color='green', linestyle='--')

@@ -44,6 +44,8 @@ if __name__ == '__main__':
                 number_of_reruns = configuration['number_of_reruns']
                 
                 min_value_per_iteration = np.zeros((len(iterations), number_of_reruns))
+                value_per_iteration = np.zeros((sum(iterations), number_of_reruns))
+
                 
                 aux_min_values = collections.defaultdict(lambda: np.zeros((len(iterations), number_of_reruns)))
 
@@ -64,7 +66,8 @@ if __name__ == '__main__':
                             values = all_values[start_index:end_index]
                             #values = values[~np.isnan(values)]
                             min_value = np.min(values)
-                            
+
+                            value_per_iteration[:, rerun] = all_values
                             
                             arg_min_value = np.argmin(all_values[:end_index])
                             if iteration > 0:
@@ -79,16 +82,10 @@ if __name__ == '__main__':
                                 
                                 aux_min_values[aux_name][iteration, rerun] = min_aux_value
 
-                            output_parameters_filename = os.path.join(output_folder,
-                                                         f'parameters.txt')
-                            output_parameters = np.loadtxt(output_parameters_filename)
+
                             min_shapes_per_iteration.append(output_parameters[arg_min_value])
 
-                            mean_value = np.mean(min_value_per_iteration[iteration,:])
 
-                            index_closest_to_mean_value = abs(mean_value - min_value_per_iteration[iteration, :]).argmin()
-
-                            closest_to_mean_shapes_per_iteration.append(output_parameters[index_closest_to_mean_value])
 
                                 
                         except Exception as e:
@@ -96,6 +93,37 @@ if __name__ == '__main__':
                              print(str(e))
                              logging.exception(e)
                              print(f"Failing {batch_size_factor} {starting_size} {generator}")
+                for iteration in range(len(iterations)):
+                    mean_value = np.mean(min_value_per_iteration[iteration, :])
+                    end_index = end_index = sum(iterations[:iteration + 1])
+                    index_closest_to_mean_value = np.unravel_shape(abs(mean_value - value_per_iteration[:end_index, :]).argmin(),
+                                                                   value_per_iteration.shape)
+
+                    output_folder_closest_to_mean = os.path.join(get_configuration_name(configuration['basename'],
+                                                                        index_closest_to_mean_value[1], starting_size,
+                                                                        batch_size_factor ** (-1)), 'airfoil_chain')
+
+                    output_parameters_filename_closest_to_mean = os.path.join(output_folder_closest_to_mean[1],
+                                                              f'parameters.txt')
+                    output_parameters_closest_to_mean = np.loadtxt(output_parameters_filename_closest_to_mean)
+
+                    closest_to_mean_shapes_per_iteration.append(output_parameters_closest_to_mean[index_closest_to_mean_value[0]])
+
+                    index_min_value = np.unravel_shape(value_per_iteration[:end_index, :].argmin(),
+                                                                   value_per_iteration.shape)
+
+                    output_folder_min_value = os.path.join(get_configuration_name(configuration['basename'],
+                                                                        index_min_value[1], starting_size,
+                                                                        batch_size_factor ** (-1)), 'airfoil_chain')
+
+                    output_parameters_filename_min_value = os.path.join(output_folder_min_value[1],
+                                                              f'parameters.txt')
+                    output_parameters_min_value = np.loadtxt(output_parameters_filename_min_value)
+
+                    min_shapes_per_iteration.append(output_parameters_min_value[index_min_value[0]])
+
+
+
                 plot_info.saveData(f'min_shapes_per_iteration_{python_script}_{generator}_{iterations[1]}_{starting_size}',
                                    min_shapes_per_iteration)
                 plot_info.saveData(
@@ -184,6 +212,38 @@ if __name__ == '__main__':
                     plot_info.savePlot("{script}_{source_name}_{generator}_{batch_size}_{starting_size}".format(
                         script=python_script.replace(".py", ""),
                         source_name = source_name,
+                        batch_size=iterations[1],
+                        starting_size=starting_size,
+                        generator=generator))
+                    plt.close('all')
+
+
+                    ## min/max
+                    plt.fill_between(iteration_range, np.min(source[0], 1), np.max(source[0], 1),
+                                     alpha = 0.3, color='C0')
+
+                    plt.plot(iteration_range, np.mean(source[0], 1), '-o',
+                            label='ISMO')
+
+                    plt.fill_between(iteration_range, np.min(source[1], 1), np.max(source[1], 1),
+                                     alpha=0.3, color='C1')
+
+                    plt.plot(iteration_range, np.mean(source[1], 1), '-o',
+                             label='DNN+Opt')
+
+
+                    plt.xlabel("Iteration $k$")
+                    if source_name == "objective":
+                        plt.ylabel("$\\mathbb{E}( J(x_k^*))$")
+                    else:
+                        plt.ylabel(f"$\\mathrm{{{source_name}}}(x_k^*)$")
+
+                    plt.legend()
+                    plt.title("min/max, type: {}, script: {}, generator: {}, batch_size_factor: {},\nstarting_size: {}".format(
+                        source_name, python_script, generator, batch_size_factor, starting_size))
+                    plot_info.savePlot("{script}_min_max_{source_name}_{generator}_{batch_size}_{starting_size}".format(
+                        script=python_script.replace(".py", ""),
+                        source_name=source_name,
                         batch_size=iterations[1],
                         starting_size=starting_size,
                         generator=generator))
