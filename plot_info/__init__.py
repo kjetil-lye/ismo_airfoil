@@ -1,1 +1,1 @@
-from .plot_info import savePlot, showAndSave
+from .plot_info import savePlot, showAndSave, saveData
