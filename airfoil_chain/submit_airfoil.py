@@ -42,7 +42,7 @@ class SeveralVariablesCommands(ismo.submit.defaults.Commands):
 
 if __name__ == '__main__':
     files_to_delete = ['parameters.txt', 'model_{}.h5', 'values_{}.txt',
-                       'parameters_for_optimization.txt']
+                       'parameters_for_optimization.txt', 'optimization_results.pic']
     
     for filename_template in files_to_delete:
         for component in range(3):
@@ -83,6 +83,10 @@ Submits all the jobs for the sine experiments
 
     parser.add_argument('--container', type=str, default='docker://kjetilly/machine_learning_base:0.1.2',
                         help='Container name')
+    
+    
+    parser.add_argument('--optimizer', type=str, default='L-BFGS-B',
+                        help='Name of optimizer')
 
     args = parser.parse_args()
 
@@ -112,7 +116,9 @@ Submits all the jobs for the sine experiments
                                         objective_parameter_file='penalties.json',
                                         sample_generator_name=args.generator,
                                         output_append=True,
-                                        reuse_model=True
+                                        reuse_model=True,
+                                        optimization_results_filename='optimization_results.pic',
+                                        optimizer_name=args.optimizer
                                         )
 
     chain = ismo.submit.Chain(args.number_of_samples_per_iteration, submitter,
