@@ -168,6 +168,7 @@ if __name__ == '__main__':
 
      plt.title(f'Comparison with ISMO ({args.generator})\nwith {args.compare_start_size} starting samples\nand {args.compare_batch_size} batch size.')
      plt.xscale('log', basex=2)
+     plt.yscale('log', basey=2)
      plt.xlabel("Number of evaluations of the simulator")
      plt.ylabel("Minimum value")
      plot_info.plot_info.legendLeft()
