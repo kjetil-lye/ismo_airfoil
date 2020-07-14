@@ -88,6 +88,9 @@ Submits all the jobs for the sine experiments
     parser.add_argument('--optimizer', type=str, default='L-BFGS-B',
                         help='Name of optimizer')
 
+    parser.add_argument('--do_not_draw_new_samples', action='store_true',
+                        help='Use old optimization values for next iteration of optimization.')
+
     args = parser.parse_args()
 
     submitter = ismo.submit.create_submitter(args.submitter, args.chain_name, dry_run=args.dry_run,
@@ -118,7 +121,8 @@ Submits all the jobs for the sine experiments
                                         output_append=True,
                                         reuse_model=True,
                                         optimization_results_filename='optimization_results.pic',
-                                        optimizer_name=args.optimizer
+                                        optimizer_name=args.optimizer,
+                                        do_not_draw_new_samples=args.do_not_draw_new_samples
                                         )
 
     chain = ismo.submit.Chain(args.number_of_samples_per_iteration, submitter,
