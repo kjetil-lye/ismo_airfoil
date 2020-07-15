@@ -249,7 +249,7 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   container_type=args.container_type,
                                   container=args.container,
                                   sample_generator=args.generator,
-                                  do_not_draw_new_samples=args.do_not_draw_new_samples
+                                  do_not_draw_new_samples=args.do_not_draw_new_samples,
                                   optimizer=args.optimizer)
             
                     
