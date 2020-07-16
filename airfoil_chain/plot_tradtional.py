@@ -147,21 +147,25 @@ if __name__ == '__main__':
                   fmt='o', uplims=True, lolims=True)
 
 
-     mean_traditional_per_batch = np.zeros_like(iterations_numbers)
-     std_traditional_per_batch = np.zeros_like(iterations_numbers)
+     mean_traditional_per_batch = np.zeros_like(iterations_numbers, dtype=np.float64)
+     std_traditional_per_batch = np.zeros_like(iterations_numbers, dtype=np.float64)
      
-     std_traditional_per_batch
+     mean_traditional_per_batch[:] = 42
      
      for iteration_number in iterations_numbers:
-          starting_iteration = sum(sample_per_iteration[:iteration_number])
+          starting_iteration = work_per_iteration[iteration_number]
+          
           samples = []
           for sample_array in all_minimum_values:
                if len(sample_array) > starting_iteration:
                     samples.append(sample_array[starting_iteration])
+          if len(samples) == 0:
+              print(f"iteration failing: {iteration_number}")
+        
           mean_traditional_per_batch[iteration_number] = np.mean(samples)
           std_traditional_per_batch[iteration_number] = np.std(samples)
 
-     
+     print(mean_traditional_per_batch)
      plt.errorbar(work_per_iteration, mean_traditional_per_batch,
                   yerr=std_traditional_per_batch,  label='TNC',
                   fmt='x', uplims=True, lolims=True)
@@ -174,4 +178,23 @@ if __name__ == '__main__':
      plot_info.plot_info.legendLeft()
      plot_info.showAndSave("compare_with_ismo_optimized_traditional_mean_std")
      plt.close('all')
+
+
+     plt.plot(work_per_iteration, np.mean(data_ismo, axis=1), '-o',
+                  label='ISMO'
+                  )
+
+     
+     plt.plot(work_per_iteration, mean_traditional_per_batch, '-x',
+              label='TNC')
+
+     plt.title(f'Comparison with ISMO ({args.generator})\nwith {args.compare_start_size} starting samples\nand {args.compare_batch_size} batch size.')
+     plt.xscale('log', basex=2)
+     plt.yscale('log', basey=2)
+     plt.xlabel("Number of evaluations of the simulator")
+     plt.ylabel("Minimum value")
+     plot_info.plot_info.legendLeft()
+     plot_info.showAndSave("compare_with_ismo_optimized_traditional_mean")
+     plt.close('all')
+
 
