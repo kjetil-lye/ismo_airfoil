@@ -147,10 +147,10 @@ if __name__ == '__main__':
                   fmt='o', uplims=True, lolims=True)
 
 
-     mean_traditional_per_batch = np.zeros_like(iterations_numbers, dtype=np.float64)
-     std_traditional_per_batch = np.zeros_like(iterations_numbers, dtype=np.float64)
+     mean_traditional_per_batch = []#np.zeros_like(iterations_numbers, dtype=np.float64)
+     std_traditional_per_batch = []#np.zeros_like(iterations_numbers, dtype=np.float64)
      
-     mean_traditional_per_batch[:] = 42
+     work_traditional = []
      
      for iteration_number in iterations_numbers:
           starting_iteration = work_per_iteration[iteration_number]
@@ -162,11 +162,31 @@ if __name__ == '__main__':
           if len(samples) == 0:
               print(f"iteration failing: {iteration_number}")
         
-          mean_traditional_per_batch[iteration_number] = np.mean(samples)
-          std_traditional_per_batch[iteration_number] = np.std(samples)
+          #mean_traditional_per_batch[iteration_number] = np.mean(samples)
+          #std_traditional_per_batch[iteration_number] = np.std(samples)
+          
+          mean_traditional_per_batch.append(np.mean(samples))
+          std_traditional_per_batch.append(np.std(samples))
+          work_traditional.append(starting_iteration)
+
+     # Append additional samples
+     current_work = work_traditional[-1]
+     works = sorted([len(sample_array) for sample_array in all_minimum_values])
+     
+     while 2*current_work < works[-1]:
+         current_work = 2*current_work
+         
+         samples = []
+         for sample_array in all_minimum_values:
+               if len(sample_array) > current_work:
+                    samples.append(sample_array[current_work])
+                    
+         mean_traditional_per_batch.append(np.mean(samples))
+         std_traditional_per_batch.append(np.std(samples))
+         work_traditional.append(current_work)
 
      print(mean_traditional_per_batch)
-     plt.errorbar(work_per_iteration, mean_traditional_per_batch,
+     plt.errorbar(work_traditional, mean_traditional_per_batch,
                   yerr=std_traditional_per_batch,  label='TNC',
                   fmt='x', uplims=True, lolims=True)
 
@@ -185,7 +205,7 @@ if __name__ == '__main__':
                   )
 
      
-     plt.plot(work_per_iteration, mean_traditional_per_batch, '-x',
+     plt.plot(work_traditional, mean_traditional_per_batch, '-x',
               label='TNC')
 
      plt.title(f'Comparison with ISMO ({args.generator})\nwith {args.compare_start_size} starting samples\nand {args.compare_batch_size} batch size.')
