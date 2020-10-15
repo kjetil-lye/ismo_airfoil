@@ -62,7 +62,7 @@ def get_configuration_name(basename, rerun, starting_size, batch_size_factor):
 
 
 def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_run, submitter_name, only_missing, container, container_type,
-                      sample_generator, optimizer):
+                      sample_generator, optimizer, do_not_draw_new_samples):
     starting_size = iteration_sizes[0]
     batch_size_factor = iteration_sizes[0]/iteration_sizes[1]
 
@@ -102,6 +102,8 @@ def run_configuration(*, basename, rerun, iteration_sizes, repository_path, dry_
                                   '--optimizer',
                                   optimizer
                                   ]
+                if do_not_draw_new_samples:
+                    command_to_run.append('--do_not_draw_new_samples')
 
                 if container is not None:
                     command_to_run.extend(['--container', container])
@@ -183,6 +185,10 @@ Runs the ensemble for M different runs (to get some statistics)./
                         help='Name of optimizer')
 
 
+    parser.add_argument('--do_not_draw_new_samples', action='store_true',
+                        help='Reuse old optimization values for next iteration')
+
+
     args = parser.parse_args()
 
 
@@ -211,7 +217,8 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   container_type=args.container_type,
                                   container=args.container,
                                   sample_generator=args.generator,
-                                  optimizer=args.optimizer)
+                                  optimizer=args.optimizer,
+                                  do_not_draw_new_samples=args.do_not_draw_new_samples)
             
             
             for iteration_number, iteration_size in enumerate(iteration_sizes):
@@ -242,6 +249,7 @@ Runs the ensemble for M different runs (to get some statistics)./
                                   container_type=args.container_type,
                                   container=args.container,
                                   sample_generator=args.generator,
+                                  do_not_draw_new_samples=args.do_not_draw_new_samples,
                                   optimizer=args.optimizer)
             
                     
